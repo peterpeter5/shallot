@@ -14,8 +14,8 @@ def wrap_content_type(additional_content_types=None):
                 guessed_type, guessed_encoding = guess_type(request["path"], strict=False)
                 if guessed_type:
                     response_headers["content-type"] = guessed_type
-                elif response.get("stream", None) is None:
-                    response_headers["content-type"] = "text/plain"
+                # elif response.get("stream", None) is None:  # Problem with static file caching ... FIXME maybe remove?!
+                #    response_headers["content-type"] = "text/plain"
                 else:
                     response_headers["content-type"] = "application/octet-stream"
                 

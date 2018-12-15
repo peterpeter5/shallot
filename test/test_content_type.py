@@ -18,12 +18,12 @@ async def test_content_types_are_guessed_are_not_changed_if_provided(content_typ
 
 
 @pytest.mark.asyncio
-async def test_content_types_for_none_streaming_and_non_guessable_responses_is_textplain(content_type):
+async def test_content_types_for_none_streaming_and_non_guessable_responses_is_octet_stream(content_type):
     async def no_content_type_handler(request):
         return {}
 
     response = await content_type(no_content_type_handler)({"path": "some/path/t/no/extension"})
-    assert "text/plain" == response["headers"]["content-type"]
+    assert "application/octet-stream" == response["headers"]["content-type"]
 
 @pytest.mark.asyncio
 async def test_content_types_for_streaming_without_known_ext_is_octeat(content_type):
@@ -39,5 +39,5 @@ async def test_content_types_are_guessed_for_known_extensions(content_type):
     async def no_content_type_handler(request):
         return {"status": 200}
 
-    response = await content_type(no_content_type_handler)({"path": "some/path/.txt"})
+    response = await content_type(no_content_type_handler)({"path": "some/path/t.txt"})
     assert response["headers"]["content-type"] == "text/plain"
