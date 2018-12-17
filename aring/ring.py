@@ -108,12 +108,20 @@ if __name__ == "__main__":
     from aring.middlewares.staticfiles import wrap_static
     from aring.middlewares.cors import wrap_cors
     from aring.middlewares.content_type import wrap_content_type
+    from aring.middlewares.routing import wrap_routes
     from aring.middlewares import apply_middleware
     content_types = wrap_content_type()
     statics = wrap_static("/home/peter/PycharmProjects/a-ring/test/data")
     cors = wrap_cors()
     apply_middleware(cors)(hello_world)
-    server = build_server(apply_middleware(cors, content_types, statics)(hello_world))  # content_types(cors(statics(hello_world)))
+    routes = [
+        ("/", ["GET"], hello_world),
+        ("/hello", ["GET"], hello_world)
+
+    ]
+    routing = wrap_routes(routes)
+
+    server = build_server(apply_middleware(cors, content_types, statics, routing)(hello_world))  # content_types(cors(statics(hello_world)))
     uvicorn.run(server, "127.0.0.1", 5000, log_level="info", debug=True)
 
         
