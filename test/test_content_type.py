@@ -1,10 +1,11 @@
 import pytest
 from aring.middlewares.content_type import wrap_content_type
+from aring.middlewares import apply_middleware
 
 
 @pytest.fixture
 def content_type():
-    return wrap_content_type()
+    return apply_middleware(wrap_content_type())
 
 
 @pytest.mark.asyncio

@@ -2,6 +2,7 @@ import os
 import inspect
 import pytest
 from aring.middlewares.staticfiles import wrap_static
+from aring.middlewares import apply_middleware
 
 
 unhandled = {"status": 218, "body": b""}
@@ -11,7 +12,7 @@ valid_path = "/testxt"
 
 @pytest.fixture
 def staticfiles_handler():
-    return wrap_static("./data", __here__)(noop_handler)
+    return apply_middleware(wrap_static("./data", __here__))(noop_handler)
 
 
 async def noop_handler(request):
