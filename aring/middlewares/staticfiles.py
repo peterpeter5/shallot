@@ -43,10 +43,10 @@ def wrap_static(static_folder, root_path=".", allow_symlinks=False):
     if not validate_dir_path(root_to_check_against):
         raise NotADirectoryError(f"the provided path <{root_to_check_against}> is not a directory!")
     
-    def wrap_static_files(handler):
-        async def _handle_request(request):
+    def wrap_static_files(next_middleware):
+        async def _handle_request(handler, request):
             if request['method'] not in {"GET", "HEAD"}:
-                return await handler(request)
+                return await next_middleware(handler, request)
             
             raw_path = request['path']
             if "../" in raw_path:
@@ -56,7 +56,7 @@ def wrap_static(static_folder, root_path=".", allow_symlinks=False):
                 root_path, *static_folder, re.sub("^[/]*", "", raw_path)))
             ) 
             if not (requested_path.startswith(root_to_check_against) and file_exists(requested_path)):
-                return await handler(request)
+                return await next_middleware(handler, request)
 
             fstat = await astat(requested_path)
             if stat.S_ISLNK(fstat.st_mode) and not allow_symlinks:

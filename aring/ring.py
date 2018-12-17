@@ -71,6 +71,7 @@ async def _responde_client_direct(send, response):
     await send({
         'type': 'http.response.body',
         'body': response.get("body", b''),
+        "more_body": False,
     })
 
 
@@ -94,23 +95,25 @@ def build_server(handler):
 
         return handle_handler
     return request_start
-
-
-async def hello_world(request):
-    msg = "Hello World  -> handler 1 \n\n\n %s" % request
-    msg = msg.encode()
-    return {"status": 200, "body": msg}
-    
+  
 
 if __name__ == "__main__":
+    from aring.response import text
+
+    async def hello_world(request):
+        msg = "Hello World  -> handler 1 \n\n\n %s" % request
+        return text(msg)  
+
     import uvicorn
     from aring.middlewares.staticfiles import wrap_static
     from aring.middlewares.cors import wrap_cors
     from aring.middlewares.content_type import wrap_content_type
+    from aring.middlewares import apply_middleware
     content_types = wrap_content_type()
     statics = wrap_static("/home/peter/PycharmProjects/a-ring/test/data")
     cors = wrap_cors()
-    server = build_server(content_types(cors(statics(hello_world))))
+    apply_middleware(cors)(hello_world)
+    server = build_server(apply_middleware(cors, content_types, statics)(hello_world))  # content_types(cors(statics(hello_world)))
     uvicorn.run(server, "127.0.0.1", 5000, log_level="info", debug=True)
 
         

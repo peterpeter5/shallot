@@ -23,3 +23,16 @@ def filestream(path, headers=None, chunk_size=4096):
                     break
 
     return {"status": 200, "body": b"", "stream": streamer(), "headers": headers}
+
+
+def text(body="", status=200, encoding="utf-8"):
+    transfered_body = body.encode(encoding)
+    return {
+        "status": status,
+        "body": transfered_body,
+        "headers": {
+            "content-type": f"text/plain; charset={encoding}",
+            "content-length": f"{len(transfered_body)}"
+
+        }
+    }
