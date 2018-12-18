@@ -37,9 +37,7 @@ def apply_middleware(*middlewares):
         return await _handler(request)
 
     def _wrap_handler(handler):
-        print("compose")
         call_chain =  middlewares
         chained_dispatcher = _compose(*call_chain)(exectue_handler)
-        print("chain composed")
         return partial(chained_dispatcher, handler)
     return _wrap_handler 

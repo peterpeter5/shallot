@@ -104,6 +104,9 @@ if __name__ == "__main__":
         msg = "Hello World  -> handler 1 \n\n\n %s" % request
         return text(msg)  
 
+    async def hello_index(request, idx):
+        return text(f"Index is: {idx} \n\n Request: {request}")
+
     import uvicorn
     from aring.middlewares.staticfiles import wrap_static
     from aring.middlewares.cors import wrap_cors
@@ -116,7 +119,8 @@ if __name__ == "__main__":
     apply_middleware(cors)(hello_world)
     routes = [
         ("/", ["GET"], hello_world),
-        ("/hello", ["GET"], hello_world)
+        ("/hello", ["GET"], hello_world),
+        ("/hello/{index}", ["GET"], hello_index),
 
     ]
     routing = wrap_routes(routes)
