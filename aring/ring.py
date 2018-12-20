@@ -3,6 +3,7 @@ from aring.response import filestream
 from asyncio import wait_for
 import sys
 __pytest__ = hasattr(sys, "_pytest_")
+from itertools import chain
 
 
 def unicode2(xys, encoding="utf-8"):
@@ -28,6 +29,15 @@ def make_headers_map(headers):
     }
 
 
+def serialize_headers(response):
+    headers = response.get("headers", {})
+    cookies = response.get("cookies", {})
+    return [
+        (k.encode("utf-8"), v.encode("utf-8"))
+        for k,v in chain(headers.items(), cookies.items())
+    ]
+
+
 
 async def consume_body(receive):
         body = b''
@@ -50,7 +60,7 @@ async def responde_client(send, response):
     
 async def _responde_client_chunked(send, response):
     status = response['status']
-    headers = [(k.encode("utf-8"), v.encode("utf-8")) for k,v in response.get("headers", {}).items()]
+    headers = serialize_headers(response)
     await send({
         'type': 'http.response.start',
         'status': status,
@@ -65,7 +75,7 @@ async def _responde_client_chunked(send, response):
 
 async def _responde_client_direct(send, response):
     status = response['status']
-    headers = [(k.encode("utf-8"), v.encode("utf-8")) for k,v in response.get("headers", {}).items()]
+    headers = serialize_headers(response)
     await send({
         'type': 'http.response.start',
         'status': status,
