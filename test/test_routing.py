@@ -5,7 +5,7 @@ import pytest
 sample_routing_table = [
     ("/", ["GET"], lambda x: "index"),
     ("/users", ["GET"], lambda x: "users"),
-    ("/users/{uid}", ["GET", "POST"], lambda x, y: "users/uid" + str(y)),
+    ("/users/{uid}", ["GET", "POST"], lambda x, y: "users/uid/" + str(y)),
     ("/documents", ["GET"], lambda x: "docs - get"),
     ("/documents", ["POST", "PUT"], lambda x: "change docs")
 ]
@@ -23,6 +23,12 @@ def test_build_static_router_returns_dict():
     assert set(static_router["/documents"]) == {"GET", "PUT", "POST"}
 
 
-def test_router_return_correct_handler_for_gievn_static_path(router):
-    handler = router({"path": "/", "method": "GET"})
+def test_router_return_correct_handler_for_given_static_path(router):
+    handler, args = router({"path": "/", "method": "GET"})
     assert handler(None) == "index"
+    assert args is tuple()
+
+
+def test_router_dispatches_to_dynamic_route(router):
+    handler, args = router({"path": "/users/3", "method": "GET"})
+    assert "users/uid/3" == handler(None, args[0])

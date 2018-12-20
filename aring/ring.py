@@ -1,5 +1,8 @@
 from collections import defaultdict
 from aring.response import filestream
+from asyncio import wait_for
+import sys
+__pytest__ = hasattr(sys, "_pytest_")
 
 
 def unicode2(xys, encoding="utf-8"):
@@ -75,12 +78,12 @@ async def _responde_client_direct(send, response):
     })
 
 
-def build_server(handler):
+def build_server(handler, max_responde_timeout_s=30, max_receive_timeout_s=15):
     def request_start(context):
         async def handle_handler(receive, send):
             headers_list = context.get('headers', [])
             headers = make_headers_map(headers_list)
-            body = await consume_body(receive)
+            body = await wait_for(consume_body(receive), max_receive_timeout_s)
             server_name, server_port = context.get('server', (None, None))
             request = {
                 **context, 
@@ -90,42 +93,11 @@ def build_server(handler):
 
             response = await handler(request)
             # TOOO validate response!
-            await responde_client(send, response)
-            return response
+            await wait_for(responde_client(send, response), max_responde_timeout_s)
+            if __pytest__:
+                return response
 
         return handle_handler
     return request_start
   
 
-if __name__ == "__main__":
-    from aring.response import text
-
-    async def hello_world(request):
-        msg = "Hello World  -> handler 1 \n\n\n %s" % request
-        return text(msg)  
-
-    async def hello_index(request, idx):
-        return text(f"Index is: {idx} \n\n Request: {request}")
-
-    import uvicorn
-    from aring.middlewares.staticfiles import wrap_static
-    from aring.middlewares.cors import wrap_cors
-    from aring.middlewares.content_type import wrap_content_type
-    from aring.middlewares.routing import wrap_routes
-    from aring.middlewares import apply_middleware
-    content_types = wrap_content_type()
-    statics = wrap_static("/home/peter/PycharmProjects/a-ring/test/data")
-    cors = wrap_cors()
-    apply_middleware(cors)(hello_world)
-    routes = [
-        ("/", ["GET"], hello_world),
-        ("/hello", ["GET"], hello_world),
-        ("/hello/{index}", ["GET"], hello_index),
-
-    ]
-    routing = wrap_routes(routes)
-
-    server = build_server(apply_middleware(cors, content_types, statics, routing)(hello_world))  # content_types(cors(statics(hello_world)))
-    uvicorn.run(server, "127.0.0.1", 5000, log_level="info", debug=True)
-
-        
