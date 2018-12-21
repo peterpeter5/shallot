@@ -1,7 +1,7 @@
 import re
 from mimetypes import guess_type, add_type
 
-def wrap_content_type(additional_content_types=None):
+def wrap_content_type(additional_content_types=None, default_content_type="application/octet-stream"):
     """
     :param additional_content_types: 
     """
@@ -17,7 +17,7 @@ def wrap_content_type(additional_content_types=None):
                 # elif response.get("stream", None) is None:  # Problem with static file caching ... FIXME maybe remove?!
                 #    response_headers["content-type"] = "text/plain"
                 else:
-                    response_headers["content-type"] = "application/octet-stream"
+                    response_headers["content-type"] = default_content_type
                 
                 response["headers"] = response_headers
             return response
