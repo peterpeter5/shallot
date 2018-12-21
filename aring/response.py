@@ -49,6 +49,6 @@ def json(data, status=200):
         "body": transfer_body,
         "headers": {
             "content-type": "application/json; charset=utf-8",
-            "content-length": f"{len(transfered_body)}"
+            "content-length": f"{len(transfer_body)}"
         }
     }
