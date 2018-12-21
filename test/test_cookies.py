@@ -75,13 +75,18 @@ async def test_cookie_response_dict_becomes_cookie_serializer(cookie_handler):
     }
 
 
+async def return_cookie_values_from_handler(handler, request=None):
+    request = {} if request is None else request
+    http_handler = apply_middleware(wrap_cookies)(handler)
+    response = await http_handler(request)
+    values = list(map(lambda x: x[1], response["cookies"].items()))
+    return values
+
 @pytest.mark.asyncio
 async def test_expires_date_can_be_given_as_string_and_will_be_used_as_such():
     async def expires_string_cookie(req):
         return {"cookies": {"s": {"value": 3.4, "expires": "nonsense-string"}}}
-    http_handler = apply_middleware(wrap_cookies)(expires_string_cookie)
-    response = await http_handler({})
-    values = list(map(lambda x: x[1], response["cookies"].items()))
+    values = await return_cookie_values_from_handler(expires_string_cookie)
     assert len(values) == 1
     assert values == [
         "s=3.4; expires=nonsense-string"
@@ -92,10 +97,43 @@ async def test_expires_date_can_be_given_as_string_and_will_be_used_as_such():
 async def test_expires_date_as_number_will_be_converted_to_string():
     async def expires_int_float_cookie(req):
         return {"cookies": {"s": {"value": 3.4, "expires": 1545335438.5059335}}}
-    http_handler = apply_middleware(wrap_cookies)(expires_int_float_cookie)
-    response = await http_handler({})
-    values = list(map(lambda x: x[1], response["cookies"].items()))
+    values = await return_cookie_values_from_handler(expires_int_float_cookie) 
     assert len(values) == 1
     assert values == [
         "s=3.4; expires=Thu, 20 Dec 2018 19:50:38 GMT"
     ]
+
+
+@pytest.mark.asyncio
+async def test_cookies_get_unset_when_descr_is_None():
+    async def unset_one_set_one_new_cookie(req):
+        return {"cookies": {"t": None, "a": {"value": "zt"}}}
+    values = await return_cookie_values_from_handler(unset_one_set_one_new_cookie)
+    assert len(values) == 2
+    assert set(values) == {
+        "t=; expires=Thu, 20 Dec 2018 19:50:38 GMT",
+        "a=zt"
+    }
+
+
+@pytest.mark.asyncio
+@pytest.mark.xfail
+async def test_all_request_cookies_get_unset_when_response_sets_cookies_to_none():
+    """
+    originally implemented as feature... At the moment i dont think it makes sense.
+    it would suggest, that one can unset ALL cookies with just returning None. But thats only 
+    true for cookies from the same route... I think a removal via explicit setting the cookie-name: None should
+    be prefered. Although the complete feature might go away...
+    """
+    
+    async def unset_all_request_cookies(request):
+        return {
+            "cookies": None
+        }
+    request_with_cookies = {"headers": {"cookie": "mu=choo; du=voo"}}
+    values = await return_cookie_values_from_handler(unset_all_request_cookies, request_with_cookies)
+    assert len(values) == 2
+    assert set(values) == {
+        "mu=; expires=Thu, 20 Dec 2018 19:50:38 GMT",
+        "du=; expires=Thu, 20 Dec 2018 19:50:38 GMT"
+    }
