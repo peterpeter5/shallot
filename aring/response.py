@@ -1,8 +1,13 @@
 import aiofiles
+import json as pyjson
 
 
-def responde404():
-    return {"status": 404, "body": b"Not Found", "headers": {"content-type": "text/plain"}}
+def responde404(message="Not Found"):
+    return text(message, status=404)
+
+
+def responde400(message=""):
+    return text(message, status=400)
 
 
 def responde_not_modified(headers):
@@ -33,6 +38,17 @@ def text(body="", status=200, encoding="utf-8"):
         "headers": {
             "content-type": f"text/plain; charset={encoding}",
             "content-length": f"{len(transfered_body)}"
+        }
+    }
 
+
+def json(data, status=200):
+    transfer_body = pyjson.dumps(data).encode()
+    return {
+        "status": 200,
+        "body": transfer_body,
+        "headers": {
+            "content-type": "application/json; charset=utf-8",
+            "content-length": f"{len(transfered_body)}"
         }
     }
