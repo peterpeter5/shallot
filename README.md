@@ -112,7 +112,7 @@ async def handle_404(request):
 middleware_pile = apply_middleware(
     wrap_cors(),
     wrap_content_type(),
-    wrap_static("/home/peter/PycharmProjects/a-ring/test/data"),
+    wrap_static("/static/data"),
     wrap_routes(routes),
     wrap_cookies,
     wrap_json,
