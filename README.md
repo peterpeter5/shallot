@@ -50,7 +50,7 @@ async def handler(request):
 
 ### middleware
 
-All of `shallot`s functionality is implemented via middlewares. That makes it possible to easily extend, configure or change `shallot`s behaviour. In fact: if you dont like the implementation of a certain middleware, just write your own and use it insetad (or better: enhance `shallot` via PR)!
+All of `shallot`s functionality is implemented via middlewares. That makes it possible to easily extend, configure or change `shallot`s behaviour. In fact: if you don't like the implementation of a certain middleware, just write your own and use it insetad (or better: enhance `shallot` via PR)!
 
 The general functionality of a middleware, is that it wraps a handler-function-call. Middlewares are designed that way, that they can be composed / chained together. So for a middleware-chain with 3 different middlewares, a call chain might look like:
 
@@ -126,6 +126,74 @@ server = build_server(middlewre_pile(handle_404))
 ## Features
 
 Nothing is enabled by default. Every functionality has its own middleware.  
+
+### JSON
+to easily work with json-data, use the json-middleware:
+```python
+build_server(apply_middleware(wrap_json)(handler))
+```
+every request, that contains a content-type `application/json` will be parsed and the result will be attached to the request under the key `json`. 
+When data body is not parseable as json, the middleware will respond with `{"status": 400, "body": "Malformed JSON"}`.
+
+when you want to return json-data as your response, use the `shallot.response` - function `json`:
+
+```python
+from shallot.response import json
+
+async def json_handler(request):
+    return json({"hello": "world"})
+```
+
+### static-files
+
+`shallot` is not optimized to work as static-file-server. Altough it goes to great length, to provide a solid experience for serving static content.
+
+to work with static-files use the `wrap_static` - middleware:
+```python
+rel_path_to_folder_to_serve_from = "/static/data"
+build_server(apply_middleware(wrap_static(rel_path_to_folder_to_serve_from))(handler))
+```
+
+This middleware depends on `aiofiles`. It will try to match the path of an request, to files in the folder `/static/data` relative to your current $PWD / %CWD%. To provide a `cwd` indepented path, call `wrap_static` with a root-path:
+
+```python
+import os
+here = os.path.dirname(__file__)
+wrap_static("/static/data", root_path=here)  # will always assume the folder is located : <this_file>.py/static/data
+```
+By defalult `symlinks` are forbidden. You can override this via parameter in `wrap_static`-function. 
+
+Browser-caches will be honored. For that, `last-modified` and `etag` - headers will be send accordingly. When the browser requests a already-cached resource (`if-none-match` or/and `if-modified-since`), this middleware will reply with a `304-Not Modified`.
+For further information about browser-file-caches: [MDN:Cache validation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching#Cache_validation)
+
+Requests with a path containing "../" will be automatically responded with `404-Not Found`.
+
+### Content-Types
+
+for static-files it can be convenient to use the content-type-middleware: `wrap_content_type`
+So when a resource is requested, for example: "/static/index.html", then this middleware will set the `content-type`-header to `text/html`
+
+```python
+
+server = build_server(apply_middleware(
+    wrap_content_type())(handler)
+)
+```
+By defalut it will guess the content-type based on the python-builtin `mimetypes`. The default is to use `mimetypes` with non-strict evaluation. To change this behaviour one can provide a `strict=True` falg to `wrap_content`.
+
+When the content-type can not be guessed, "application/octet-stream" is used. This can be overriden via `wrap_content_type`.
+
+This middleware will only add a `content-type`-header when none is provided in the response.  
+
+Additional type->extension-mappings can be provided to `wrap_content_type` via dict:
+
+```python
+add_mapping = {"application/fruit": [".apple", "orange"]}
+apply_middleware(wrap_content_type(additional_content_types=add_mapping))
+```
+
+the key is the content-type to map to, and the value is a list of extensions (with or without leading-dot)
+
 
 ### Cookies
 
