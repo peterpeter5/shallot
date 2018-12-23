@@ -1,6 +1,6 @@
 import pytest
-from aring.middlewares import apply_middleware
-from aring.middlewares.json import wrap_json
+from shallot.middlewares import apply_middleware
+from shallot.middlewares.json import wrap_json
 
 
 @pytest.fixture

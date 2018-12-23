@@ -1,6 +1,6 @@
 import pytest
 import asyncio
-from aring.ring import build_server
+from shallot.ring import build_server
 from asyncio import TimeoutError
 
 async def noop_sender(x):

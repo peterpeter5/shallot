@@ -1,6 +1,6 @@
 import pytest
-from aring.middlewares.content_type import wrap_content_type
-from aring.middlewares import apply_middleware
+from shallot.middlewares.content_type import wrap_content_type
+from shallot.middlewares import apply_middleware
 
 
 @pytest.fixture

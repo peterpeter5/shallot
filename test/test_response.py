@@ -1,4 +1,4 @@
-from aring.response import filestream
+from shallot.response import filestream
 import inspect
 import os
 import pytest

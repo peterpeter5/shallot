@@ -1,5 +1,5 @@
 import json
-from aring.response import responde400
+from shallot.response import respond400
 
 def wrap_json(next_middleware):
     async def json_result(handler, request):
@@ -10,7 +10,7 @@ def wrap_json(next_middleware):
                 data = json.loads(body)
                 request["json"] = data
             except json.JSONDecodeError:
-                return responde400("Malformed JSON")
+                return respond400("Malformed JSON")
         else:
             request["json"] = None
         return await next_middleware(handler, request)

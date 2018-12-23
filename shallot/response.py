@@ -2,15 +2,15 @@ import aiofiles
 import json as pyjson
 
 
-def responde404(message="Not Found"):
+def respond404(message="Not Found"):
     return text(message, status=404)
 
 
-def responde400(message=""):
+def respond400(message=""):
     return text(message, status=400)
 
 
-def responde_not_modified(headers):
+def respond_not_modified(headers):
     msg = b"Not Modified"
     headers["content-length"] = str(len(msg))
     return {"status": 304, "body": msg, "headers": headers}

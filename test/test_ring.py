@@ -1,6 +1,6 @@
 import inspect
 import pytest
-from aring.ring import build_server
+from shallot.ring import build_server
 
 
 

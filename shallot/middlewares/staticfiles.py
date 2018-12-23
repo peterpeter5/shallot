@@ -1,7 +1,7 @@
 import os
 import re
 from urllib.parse import unquote
-from aring.response import responde404, filestream, responde_not_modified
+from shallot.response import respond404, filestream, respond_not_modified
 from aiofiles.os import stat as astat
 from email.utils import formatdate
 from hashlib import md5
@@ -50,7 +50,7 @@ def wrap_static(static_folder, root_path=".", allow_symlinks=False):
             
             raw_path = request['path']
             if "../" in raw_path:
-                return responde404()
+                return respond404()
             
             requested_path = os.path.abspath(unquote(os.path.join(
                 root_path, *static_folder, re.sub("^[/]*", "", raw_path)))
@@ -60,12 +60,12 @@ def wrap_static(static_folder, root_path=".", allow_symlinks=False):
 
             fstat = await astat(requested_path)
             if stat.S_ISLNK(fstat.st_mode) and not allow_symlinks:
-                return responde404()
+                return respond404()
             
             caching_headers = make_caching_headers(fstat)
             client_caching_headers = extract_matching_cache(request.get("headers", {}))
             if client_caching_headers and client_caching_headers.items() <= caching_headers.items():
-                return responde_not_modified(caching_headers)
+                return respond_not_modified(caching_headers)
             else:
                 return filestream(requested_path, headers=caching_headers)
 

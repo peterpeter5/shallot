@@ -1,6 +1,6 @@
-from aring.middlewares.cookies import CookieSerializer, make_morsel_from_description, wrap_cookies
-from aring.middlewares import apply_middleware
-from aring.ring import serialize_headers
+from shallot.middlewares.cookies import CookieSerializer, make_morsel_from_description, wrap_cookies
+from shallot.middlewares import apply_middleware
+from shallot.ring import serialize_headers
 import pytest
 
 cookie_values = {

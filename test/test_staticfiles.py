@@ -1,8 +1,8 @@
 import os
 import inspect
 import pytest
-from aring.middlewares.staticfiles import wrap_static
-from aring.middlewares import apply_middleware
+from shallot.middlewares.staticfiles import wrap_static
+from shallot.middlewares import apply_middleware
 
 
 unhandled = {"status": 218, "body": b""}

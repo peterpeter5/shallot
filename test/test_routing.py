@@ -1,4 +1,4 @@
-from aring.middlewares.routing import build_static_router, router as _router
+from shallot.middlewares.routing import build_static_router, router as _router
 import pytest
 
 

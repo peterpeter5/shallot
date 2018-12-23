@@ -1,5 +1,5 @@
 from collections import defaultdict
-from aring.response import filestream
+from shallot.response import filestream
 from asyncio import wait_for
 import sys
 __pytest__ = hasattr(sys, "_pytest_")
