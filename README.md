@@ -72,10 +72,12 @@ in order to make middlewares composeable / work together, thy must implement the
 def wrap_print_logging(next_middleware):
     async def _log_request_response(handler, request):
         print(f"Request to the handler: {request}")
+        
         response = await next_middleware(handler, request)
+        
         print(f"Response from the handler: {response}")
         return response
-    return _log_request_reponse
+    return _log_request_response
 ```
 
 The above example shows middleware that would simply printout the request and the reponse from the handler. Every middleware will run for EVERY request that comes to your application!
@@ -170,6 +172,7 @@ Cookies are send to the client, when the response contains a `cookies`-key. The 
 ```
 
 This will result in a *session-cookie* : `{"cookie-name": 0}`, which will be sent with the next request. Further data can be attached to the cookie. The supported keys are, all names that are supported by [python-std-lib:morsel]("https://docs.python.org/3/library/http.cookies.html#http.cookies.Morsel"):
+
     - expires
     - path
     - comment
@@ -181,8 +184,8 @@ This will result in a *session-cookie* : `{"cookie-name": 0}`, which will be sen
 
 The `expires` value can be set in two diffrent fashions: 
 
-    1. as *string*: the value will be sent *as-is* without further checking, whether it complies to a date-format.
-    2. as *int*|*float*: the value will be interpreted as a timestamp and will be converted to a date-string
+    1. *string*: the value will be sent *as-is* without further checking, whether it complies to a date-format.
+    2. *int*|*float*: the value will be interpreted as a timestamp and will be converted to a date-string
 
 #### Deleting Cookies
 
