@@ -7,7 +7,8 @@ sample_routing_table = [
     ("/users", ["GET"], lambda x: "users"),
     ("/users/{uid}", ["GET", "POST"], lambda x, y: "users/uid/" + str(y)),
     ("/documents", ["GET"], lambda x: "docs - get"),
-    ("/documents", ["POST", "PUT"], lambda x: "change docs")
+    ("/documents", ["POST", "PUT"], lambda x: "change docs"),
+    ("/trailing/", ["POST", "GET"], lambda x: "route_with_trailing_slash"),
 ]
 
 
@@ -26,6 +27,22 @@ def test_build_static_router_returns_dict():
 def test_router_return_correct_handler_for_given_static_path(router):
     handler, args = router({"path": "/", "method": "GET"})
     assert handler(None) == "index"
+    assert args is tuple()
+
+
+def test_router_return_correct_handler_for_given_static_path_ignoring_trailing_slashes(router):
+    handler, args = router({"path": "/documents", "method": "GET"})
+    assert handler(None) == "docs - get"
+    assert args is tuple()
+
+    handler, args = router({"path": "/documents/", "method": "GET"})
+    assert handler(None) == "docs - get"
+    assert args is tuple()
+
+
+def test_trailing_slashes_from_routes_are_ignored(router):
+    handler, args = router({"path": "/trailing", "method": "GET"})
+    assert handler(None) == "route_with_trailing_slash"
     assert args is tuple()
 
 

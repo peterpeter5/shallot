@@ -12,7 +12,19 @@ class RPartial:
         self.__str__()
     def __str__(self):
         return f"partial-func: <{self.func}> + args: {self.args}"
-            
+
+
+def map_over_routes(func, routing_table):
+    return map(lambda entry: (func(entry[0]), *entry[1:]), routing_table)
+
+
+def remove_trailing_slashes_from_routing_table(routing_table):
+    return map_over_routes(lambda route: route.rstrip("/"), routing_table)
+
+
+def lowercase_all_routes(routing_table):
+    return map_over_routes(lambda route: route.lower(), routing_table)
+
 
 def build_static_router(routing_table):
     static_routs = list(filter(lambda entry: "{" not in entry[0], routing_table))
@@ -46,11 +58,12 @@ def build_dynamic_router(routing_table):
 
 
 def router(routing_table):
+    routing_table = list(remove_trailing_slashes_from_routing_table(routing_table))
     static_router = build_static_router(routing_table)
     dynamic_router = build_dynamic_router(routing_table)
 
     def dispatch(request):
-        path = request["path"]
+        path = request["path"].rstrip("/")
         method = request["method"]
         try:
             return static_router[path][method], tuple()
