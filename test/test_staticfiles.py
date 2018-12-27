@@ -9,6 +9,18 @@ unhandled = {"status": 218, "body": b""}
 __here__ = os.path.dirname(__file__) 
 valid_path = "/testxt"
 
+valid_source = os.path.join(__here__, "data", valid_path.lstrip("/"))
+valid_link_name = "linked.txt"
+valid_link = os.path.join(__here__, "data", valid_link_name)
+
+@pytest.fixture
+def linked_file():
+    os.symlink(valid_source, valid_link)
+    assert os.path.exists(valid_link) and os.path.isfile(valid_link), "Wrong test setup"
+
+    yield "/" + valid_link_name
+    os.unlink(valid_link)
+
 
 @pytest.fixture
 def staticfiles_handler():
@@ -51,3 +63,10 @@ async def test_static_response_have_caching_headers(staticfiles_handler):
     response = await staticfiles_handler({"method": "GET", "path": valid_path})
     assert "last-modified" in response["headers"]
     assert "etag" in response["headers"]
+
+
+@pytest.mark.asyncio 
+@pytest.mark.xfail  # This is a planned feature, but its complex. FIXME later
+async def test_by_default_sym_links_are_forbidden(staticfiles_handler, linked_file):
+    response = await staticfiles_handler({"method": "GET", "path": linked_file})
+    assert response["status"] == 404

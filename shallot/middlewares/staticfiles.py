@@ -13,7 +13,7 @@ def validate_dir_path(path):
 
 
 def file_exists(path):
-    return path and os.path.isfile(path)
+    return path and "\x00" not in path and os.path.isfile(path)
 
 
 def make_caching_headers(filestats):
@@ -36,7 +36,7 @@ def extract_matching_cache(client_headers):
     }
 
 
-def wrap_static(static_folder, root_path=".", allow_symlinks=False):
+def wrap_static(static_folder, root_path="."):
     static_folder = os.path.split(static_folder)
     root_to_check_against = os.path.abspath(os.path.join(root_path, *static_folder))
     
@@ -59,8 +59,6 @@ def wrap_static(static_folder, root_path=".", allow_symlinks=False):
                 return await next_middleware(handler, request)
 
             fstat = await astat(requested_path)
-            if stat.S_ISLNK(fstat.st_mode) and not allow_symlinks:
-                return respond404()
             
             caching_headers = make_caching_headers(fstat)
             client_caching_headers = extract_matching_cache(request.get("headers", {}))

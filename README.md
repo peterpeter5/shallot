@@ -127,6 +127,45 @@ server = build_server(middlewre_pile(handle_404))
 
 Nothing is enabled by default. Every functionality has its own middleware.  
 
+### Routing
+To include `shallot` builtin routing use the routing-middleware: `wrap_routes`:
+```python
+build_server(apply_middleware(wrap_routes(routes)(default_handler)))
+```
+The routing-middleware is somewhat special, to other middlewares. It does not enhance the request/response, but chooses a new handler for the specific request. If the router can't find a matching handler for the route, then the `default_handler` will be transfered into the next middleware(s).
+
+routing is one essential and by far, the most opinonated part of any webframeworks-api. `shallot` is there no exception. Routing is defined completely via a data-structure:
+
+```python
+...
+
+async def hello_world(request):
+    return text("hi user!")
+
+async def handle_index(request, idx):
+    return text(f"hi user number: {idx}")
+
+routes = [
+    ("/", ["GET"], hello_world),
+    ("/hello", ["GET"], hello_world),
+    ("/hello/{index}", ["GET"], handle_index),
+    ("/echo", ["GET", "PUT", "POST"], post_echo),
+    ("/json", ["GET", "PUT"], show_and_accept_json),
+]
+
+```
+as shown above, `routes` is a list of tuples with:
+    
+    1. the (potentially dynamic) route
+    2. the allowed methods
+    3. the handler
+
+routes with an `{tag}` in it, are considered dynamic-routes. The router will parse the value from the url and transfered it (as string) to the handler-function. Therfore the handler function must accept the `request` and as many arguments as there are `{tag}`s.
+
+maybe one controversial one upfront: trailing slashes are ignored. In the defined routes and in the matching of requests too.
+
+
+
 ### JSON
 to easily work with json-data, use the json-middleware:
 ```python
@@ -161,7 +200,6 @@ import os
 here = os.path.dirname(__file__)
 wrap_static("/static/data", root_path=here)  # will always assume the folder is located : <this_file>.py/static/data
 ```
-By defalult `symlinks` are forbidden. You can override this via parameter in `wrap_static`-function. 
 
 Browser-caches will be honored. For that, `last-modified` and `etag` - headers will be send accordingly. When the browser requests a already-cached resource (`if-none-match` or/and `if-modified-since`), this middleware will reply with a `304-Not Modified`.
 For further information about browser-file-caches: [MDN:Cache validation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching#Cache_validation)
@@ -252,8 +290,8 @@ This will result in a *session-cookie* : `{"cookie-name": 0}`, which will be sen
 
 The `expires` value can be set in two diffrent fashions: 
 
-    1. *string*: the value will be sent *as-is* without further checking, whether it complies to a date-format.
-    2. *int*|*float*: the value will be interpreted as a timestamp and will be converted to a date-string
+    1. string: the value will be sent *as-is* without further checking, whether it complies to a date-format.
+    2. int|float: the value will be interpreted as a timestamp and will be converted to a date-string
 
 #### Deleting Cookies
 
