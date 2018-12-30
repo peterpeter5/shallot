@@ -1,0 +1,22 @@
+import setuptools
+import os
+
+__here__ = os.path.dirname(__file__)
+
+with open(os.path.join(__here__, "README.md"), "r") as fh:
+    long_description = fh.read()
+
+setuptools.setup(
+    name="shallot",
+    version="0.0.1",
+    author="Peter Peter",
+    author_email="dev.peterpeter5@gmail.com",
+    description="Fast, small ASGI-compliant webframework",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/peterpeter5/shallot",
+    packages=setuptools.find_packages(),
+    classifiers=[
+        "Programming Language :: Python :: 3",
+    ],
+)
