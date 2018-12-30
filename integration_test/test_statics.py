@@ -1,6 +1,5 @@
 from hypothesis import given, settings
 from hypothesis import strategies as st
-from hypothesis_fspaths import fspaths
 import pytest
 import os
 from shallot.ring import build_server

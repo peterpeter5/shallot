@@ -49,3 +49,8 @@ def test_trailing_slashes_from_routes_are_ignored(router):
 def test_router_dispatches_to_dynamic_route(router):
     handler, args = router({"path": "/users/3", "method": "GET"})
     assert "users/uid/3" == handler(None, args[0])
+
+
+def test_router_dispatches_to_dynamic_route_ignoring_trailing_slashes(router):
+    handler, args = router({"path": "/users/3/", "method": "GET"})
+    assert "users/uid/3" == handler(None, args[0])
