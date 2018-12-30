@@ -2,8 +2,9 @@ from collections import defaultdict
 from shallot.response import filestream
 from asyncio import wait_for
 import sys
-__pytest__ = hasattr(sys, "_pytest_")
 from itertools import chain
+
+__pytest__ = hasattr(sys, "_pytest_")
 
 
 def unicode2(xys, encoding="utf-8"):
