@@ -9,11 +9,12 @@ __pytest__ = hasattr(sys, "_pytest_")
 
 def unicode2(xys, encoding="utf-8"):
     x, y = xys
-    return (x.decode(encoding), y.decode(encoding)) 
+    return (x.decode(encoding), y.decode(encoding))
+
 
 def lowercase_key(xys):
     x, y = xys
-    return (x.lower(), y) 
+    return (x.lower(), y)
 
 
 def make_headers_map(headers):
@@ -35,22 +36,21 @@ def serialize_headers(response):
     cookies = response.get("cookies", {})
     return [
         (k.encode("utf-8"), v.encode("utf-8"))
-        for k,v in chain(headers.items(), cookies.items())
+        for k, v in chain(headers.items(), cookies.items())
     ]
 
 
-
 async def consume_body(receive):
-        body = b''
-        more_body = True
+    body = b''
+    more_body = True
 
-        while more_body:
-            message = await receive()
-            body += message.get('body', b'')
-            more_body = message.get('more_body', False)
+    while more_body:
+        message = await receive()
+        body += message.get('body', b'')
+        more_body = message.get('more_body', False)
 
-        return body
- 
+    return body
+
 
 async def responde_client(send, response):
     streaming = response.get("stream")
@@ -58,7 +58,8 @@ async def responde_client(send, response):
         await _responde_client_direct(send, response)
     else:
         await _responde_client_chunked(send, response)
-    
+
+
 async def _responde_client_chunked(send, response):
     status = response['status']
     headers = serialize_headers(response)
@@ -71,7 +72,6 @@ async def _responde_client_chunked(send, response):
     async for chunk in bytestream:
         await send({'type': 'http.response.body', 'body': chunk, 'more_body': True})
     await send({'type': 'http.response.body', 'body': b'', 'more_body': False})
-        
 
 
 async def _responde_client_direct(send, response):
@@ -97,7 +97,7 @@ def build_server(handler, max_responde_timeout_s=30, max_receive_timeout_s=15):
             body = await wait_for(consume_body(receive), max_receive_timeout_s)
             server_name, server_port = context.get('server', (None, None))
             request = {
-                **context, 
+                **context,
                 "headers": headers, 'body': body, 'headers_list': headers_list,
                 "server_name": server_name, "server_port": server_port
             }
@@ -110,5 +110,3 @@ def build_server(handler, max_responde_timeout_s=30, max_receive_timeout_s=15):
 
         return handle_handler
     return request_start
-  
-

@@ -32,10 +32,10 @@ def format_expiration_date(expires):
 class CookieSerializer:
     def __init__(self, morsels):
         self._morsels = morsels
-    
+
     def items(self):
         return (
-            m.output().split(": ") 
+            m.output().split(": ")
             for m in self._morsels
         )
 
@@ -48,13 +48,13 @@ def wrap_cookies(next_middleware):
                 c = SimpleCookie(headers["cookie"])
             except CookieError:
                 c = SimpleCookie("")
-            cookies = {k:v.value for k, v in c.items()}
+            cookies = {k: v.value for k, v in c.items()}
         else:
             cookies = {}
 
-        request["cookies"] = cookies        
+        request["cookies"] = cookies
         response = await next_middleware(handler, request)
-        
+
         response_cookies = CookieSerializer(
             make_morsel_from_description(name, descr) if descr is not None else make_unset_morsel(name)
             for name, descr in response.get("cookies", {}).items())

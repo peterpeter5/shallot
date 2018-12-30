@@ -27,6 +27,7 @@ async def test_content_types_for_none_streaming_and_non_guessable_responses_is_o
     response = await content_type(no_content_type_handler)({"path": "some/path/t/no/extension"})
     assert "application/octet-stream" == response["headers"]["content-type"]
 
+
 @pytest.mark.asyncio
 async def test_content_types_for_streaming_without_known_ext_is_octeat(content_type):
     async def stream_handler(request):
@@ -43,7 +44,6 @@ async def test_default_content_types_for_unknown_ext_can_be_overridden():
     content_type = apply_middleware(wrap_content_type(default_content_type="app/buba"))
     response = await content_type(stream_handler)({"path": "some/path/t/no/extension"})
     assert "app/buba" == response["headers"]["content-type"]
-
 
 
 @pytest.mark.asyncio

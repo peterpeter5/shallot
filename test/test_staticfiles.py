@@ -6,12 +6,13 @@ from shallot.middlewares import apply_middleware
 
 
 unhandled = {"status": 218, "body": b""}
-__here__ = os.path.dirname(__file__) 
+__here__ = os.path.dirname(__file__)
 valid_path = "/testxt"
 
 valid_source = os.path.join(__here__, "data", valid_path.lstrip("/"))
 valid_link_name = "linked.txt"
 valid_link = os.path.join(__here__, "data", valid_link_name)
+
 
 @pytest.fixture
 def linked_file():
@@ -34,11 +35,11 @@ async def noop_handler(request):
 def test_wrap_static_is_middleware():
     request_handler = wrap_static(os.path.join(__here__, "data"))(noop_handler)
     assert inspect.isfunction(request_handler)
-    
+
 
 @pytest.mark.asyncio
 async def test_static_middleware_does_nothing_on_other_than_get_head(staticfiles_handler):
-    responses = [await staticfiles_handler({"method": meth, "path": valid_path}) for meth in ["POST", "PUT", "OPTIONS"] ]
+    responses = [await staticfiles_handler({"method": meth, "path": valid_path}) for meth in ["POST", "PUT", "OPTIONS"]]
     assert len(responses) > 0
     for response in responses:
         assert unhandled is response
@@ -46,7 +47,7 @@ async def test_static_middleware_does_nothing_on_other_than_get_head(staticfiles
 
 @pytest.mark.asyncio
 async def test_static_middleware_does_404_on_double_dotted_paths(staticfiles_handler):
-    response = await staticfiles_handler({"method": "GET", "path": valid_path + "../" })
+    response = await staticfiles_handler({"method": "GET", "path": valid_path + "../"})
     assert response["status"] == 404
 
 
@@ -65,7 +66,7 @@ async def test_static_response_have_caching_headers(staticfiles_handler):
     assert "etag" in response["headers"]
 
 
-@pytest.mark.asyncio 
+@pytest.mark.asyncio
 @pytest.mark.xfail  # This is a planned feature, but its complex. FIXME later
 async def test_by_default_sym_links_are_forbidden(staticfiles_handler, linked_file):
     response = await staticfiles_handler({"method": "GET", "path": linked_file})

@@ -22,6 +22,7 @@ encoding = sys.getfilesystemencoding()
 __here__ = os.path.dirname(__file__)
 __test_data__ = "../test/data"
 
+
 @pytest.fixture
 def running_server():
     handler = apply_middleware(wrap_static(__test_data__, __here__))(noop_handler)
@@ -33,6 +34,7 @@ def running_server():
     yield f"http://{ip_port[0]}:{ip_port[1]}/"
     process.terminate()
     time.sleep(1)
+
 
 # ------ rfc1738 definitions --------------
 alpha = string.ascii_letters
@@ -47,6 +49,7 @@ st_hsegment = st_uchar | st.text(alphabet=";:@&=")
 st_hpath_list = st.lists(st_hsegment)
 
 # -------------------------------------------
+
 
 async def noop_handler(request):
     return {"status": 218}
@@ -72,7 +75,7 @@ def is_url_encodeable(path_name):
 
         return not ("?" in path_name or "#" in path_name or "/" in path_name or "\x00" in path_name)
     except Exception:
-       return False 
+        return False
 
 
 @given(path=st.text().filter(is_url_encodeable), content=st.binary(min_size=0, max_size=10*6))
@@ -84,7 +87,7 @@ def test_all_urlencodeable_filenames_can_be_served_via_statics(running_server, p
     base_dir, fname = os.path.split(path)
     statics_folder = os.path.join(__here__, __test_data__)
     random_string = content
-    
+
     with NamedTemporaryFile(dir=os.path.join(statics_folder, base_dir), prefix=fname) as tfile:
         tfile.write(random_string)
         tfile.flush()

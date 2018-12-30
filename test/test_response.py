@@ -36,13 +36,12 @@ async def test_filestream_response_will_fail_on_consmution_not_before():
 async def test_filestream_reads_all_bytes_chunked():
     for size in [0, 1, 1024, 4095, 4096, 4098, 4098*5 + 3]:
         with NamedTemporaryFile() as temp:
-            content = b'\x09'* size
+            content = b'\x09' * size
             temp.write(content)
             temp.flush()
             fs = filestream(temp.name)
             actual = b''
             async for chunk in fs['stream']:
                 actual += chunk
-                
+
             assert actual == content, f"Len of actual: <{len(actual)}> and of content <{len(content)}> "
-            

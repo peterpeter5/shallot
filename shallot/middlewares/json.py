@@ -1,6 +1,7 @@
 import json
 from shallot.response import respond400
 
+
 def wrap_json(next_middleware):
     async def json_result(handler, request):
         content_type = request.get("headers", {}).get("content-type", "")
@@ -14,5 +15,5 @@ def wrap_json(next_middleware):
         else:
             request["json"] = None
         return await next_middleware(handler, request)
-    
+
     return json_result

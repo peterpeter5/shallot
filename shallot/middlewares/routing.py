@@ -1,15 +1,20 @@
 from collections import defaultdict
 import re
 
+
 class RPartial:
     __slots__ = ("func", "args")
+
     def __init__(self, func, args):
         self.func = func
         self.args = args
+
     def __call__(self, *args, **kwargs):
         return self.func(*(args + self.args), **kwargs)
+
     def __repr__(self):
         self.__str__()
+
     def __str__(self):
         return f"partial-func: <{self.func}> + args: {self.args}"
 
@@ -30,7 +35,7 @@ def build_static_router(routing_table):
     static_routs = list(filter(lambda entry: "{" not in entry[0], routing_table))
     static_router = {}
     for route, methods, dispatch in static_routs:
-        methods_before = static_router.get(route, {}) 
+        methods_before = static_router.get(route, {})
         new_methods = {
             meth: dispatch
             for meth in methods
@@ -38,7 +43,7 @@ def build_static_router(routing_table):
         static_router[route] = {
             **methods_before,
             **new_methods
-            }
+        }
     return static_router
 
 
@@ -71,7 +76,7 @@ def router(routing_table):
             regex_matchers = dynamic_router.get(path.count("/"))
             if not regex_matchers:
                 return None, None
-            for possible , extra_info in regex_matchers.items():
+            for possible, extra_info in regex_matchers.items():
                 match = re.fullmatch(possible, path)
                 if match and method in extra_info:
                     return extra_info[method], match.groups()
@@ -83,6 +88,7 @@ def router(routing_table):
 
 def wrap_routes(routing_table):
     _router = router(routing_table)
+
     def wrap_middleware(next_middleware):
         async def dispatch_handler(handler, request):
             new_handler, args = _router(request)

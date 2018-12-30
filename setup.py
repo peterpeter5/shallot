@@ -26,7 +26,7 @@ setuptools.setup(
     extras_require={
         "full": full_requires,
         "test":  test_requires + full_requires
-    }, 
+    },
     classifiers=[
         "Programming Language :: Python :: 3",
     ],

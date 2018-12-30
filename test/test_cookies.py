@@ -5,16 +5,17 @@ import pytest
 
 cookie_values = {
     "session": {
-        "value": 12, 
+        "value": 12,
         "secure": True,
         "path": "/zuze",
         "domain": "asdf.purzel.com",
         "max-age": 12*34,
         "version": 4,
-        "httponly": True 
-        },
+        "httponly": True
+    },
     "apple": {"value": "quick"}
 }
+
 
 @pytest.fixture
 def cookie_handler():
@@ -42,7 +43,7 @@ def test_header_serializer_with_headers_and_cookies():
         (b"Set-Cookie", b"b=12"),
     ]
 
-    
+
 def test_cookie_serializer():
     cs = CookieSerializer(
         make_morsel_from_description(name, descr)
@@ -82,6 +83,7 @@ async def return_cookie_values_from_handler(handler, request=None):
     values = list(map(lambda x: x[1], response["cookies"].items()))
     return values
 
+
 @pytest.mark.asyncio
 async def test_expires_date_can_be_given_as_string_and_will_be_used_as_such():
     async def expires_string_cookie(req):
@@ -97,7 +99,7 @@ async def test_expires_date_can_be_given_as_string_and_will_be_used_as_such():
 async def test_expires_date_as_number_will_be_converted_to_string():
     async def expires_int_float_cookie(req):
         return {"cookies": {"s": {"value": 3.4, "expires": 1545335438.5059335}}}
-    values = await return_cookie_values_from_handler(expires_int_float_cookie) 
+    values = await return_cookie_values_from_handler(expires_int_float_cookie)
     assert len(values) == 1
     assert values == [
         "s=3.4; expires=Thu, 20 Dec 2018 19:50:38 GMT"
@@ -125,7 +127,7 @@ async def test_all_request_cookies_get_unset_when_response_sets_cookies_to_none(
     true for cookies from the same route... I think a removal via explicit setting the cookie-name: None should
     be prefered. Although the complete feature might go away...
     """
-    
+
     async def unset_all_request_cookies(request):
         return {
             "cookies": None

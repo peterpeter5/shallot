@@ -1,6 +1,7 @@
 import re
 from mimetypes import guess_type, add_type
 
+
 def wrap_content_type(additional_content_types=None, default_content_type="application/octet-stream", strict=False):
     """
     :param additional_content_types: 
@@ -21,7 +22,7 @@ def wrap_content_type(additional_content_types=None, default_content_type="appli
                     response_headers["content-type"] = guessed_type
                 else:
                     response_headers["content-type"] = default_content_type
-                
+
                 response["headers"] = response_headers
             return response
 
