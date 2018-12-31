@@ -52,8 +52,8 @@ def wrap_static(static_folder, root_path="."):
             if "../" in raw_path:
                 return respond404()
 
-            requested_path = os.path.abspath(unquote(os.path.join(
-                root_path, *static_folder, re.sub("^[/]*", "", raw_path)))
+            requested_path = os.path.abspath(os.path.join(
+                root_path, *static_folder, re.sub("^[/]*", "", raw_path))
             )
             if not (requested_path.startswith(root_to_check_against) and file_exists(requested_path)):
                 return await next_middleware(handler, request)
