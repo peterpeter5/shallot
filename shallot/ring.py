@@ -89,6 +89,10 @@ async def _responde_client_direct(send, response):
     })
 
 
+async def noop(receive, send):
+    return None
+
+
 def build_server(handler, max_responde_timeout_s=30, max_receive_timeout_s=15):
     def request_start(context):
         async def handle_handler(receive, send):
@@ -107,6 +111,10 @@ def build_server(handler, max_responde_timeout_s=30, max_receive_timeout_s=15):
             await wait_for(responde_client(send, response), max_responde_timeout_s)
             if __pytest__:
                 return response
-
-        return handle_handler
+        if "type" not in context:
+            raise NotImplementedError("no type in context! error for %s" % context)
+        if context["type"] in {"http"}:
+            return handle_handler
+        else:
+            return noop
     return request_start

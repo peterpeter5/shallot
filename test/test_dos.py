@@ -26,10 +26,10 @@ async def test_slow_body_request():
     handle_http = build_server(lambda x, y: 1, max_receive_timeout_s=0.2)
 
     with pytest.raises(TimeoutError):
-        await handle_http({})(slow_body_reader(0.1), noop_sender)
+        await handle_http({"type": "http"})(slow_body_reader(0.1), noop_sender)
 
     with pytest.raises(TimeoutError):
-        await handle_http({})(slow_body_reader(1.1), noop_sender)
+        await handle_http({"type": "http"})(slow_body_reader(1.1), noop_sender)
 
 
 @pytest.mark.asyncio
@@ -46,4 +46,4 @@ async def test_slow_body_receiver():
     handle_http = build_server(noop_handler, max_responde_timeout_s=0.1)
 
     with pytest.raises(TimeoutError):
-        await handle_http({})(noop_receive, slow_body_receiver(0.9))
+        await handle_http({"type": "http"})(noop_receive, slow_body_receiver(0.9))

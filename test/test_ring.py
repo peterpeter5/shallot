@@ -22,7 +22,7 @@ def test_ring_server_yields_function():
 
 def test_server_func_returns_handler_func_for_request():
     server = build_server(lambda x: x)
-    handler_func = server({})
+    handler_func = server({"type": "http"})
     assert inspect.isfunction(handler_func)
 
 
@@ -30,7 +30,7 @@ def test_server_func_returns_handler_func_for_request():
 async def test_server_coerces_header_list_into_dict():
     headers = [(b"a", b"asdff"), (b"ccccccccc"*1024, b"zu777/&!&/"), (b"double", b"123"), (b"double", b"asdf")]
     server = build_server(handler_identity)
-    handler_func = server({"headers": headers})
+    handler_func = server({"headers": headers, "type": "http"})
     result = await handler_func(receive_none, send_none)
     assert {"a": "asdff", "ccccccccc"*1024: "zu777/&!&/", "double": "123,asdf"} == result['headers']
 
@@ -38,6 +38,6 @@ async def test_server_coerces_header_list_into_dict():
 @pytest.mark.asyncio
 async def test_server_has_no_problems_with_empty_headers():
     server = build_server(handler_identity)
-    handler_func = server({})
+    handler_func = server({"type": "http"})
     result = await handler_func(receive_none, send_none)
     assert {} == result['headers']
