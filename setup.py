@@ -9,7 +9,7 @@ with open(os.path.join(__here__, "README.md"), "r") as fh:
 
 
 full_requires = ["uvicorn"]
-test_requires = ["pytest", "hypothesis", "requests"]
+test_requires = ["pytest", "hypothesis", "requests", "pytest-asyncio"]
 
 
 setuptools.setup(
@@ -22,7 +22,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/peterpeter5/shallot",
     packages=setuptools.find_packages(),
-    install_requires=["aiofiles", ],
+    install_requires=["aiofiles"],
     extras_require={
         "full": full_requires,
         "test":  test_requires + full_requires

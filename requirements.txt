@@ -1,0 +1,9 @@
+autopep8
+aiofiles
+uvicorn
+hypothesis
+pytest
+requests
+wheel
+setuptools
+pytest-asyncio
