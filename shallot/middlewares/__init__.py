@@ -1,4 +1,9 @@
 from functools import partial, reduce
+from .content_type import wrap_content_type
+from .cookies import wrap_cookies
+from .json import wrap_json
+from .parameters import wrap_parameters
+from .staticfiles import wrap_static
 
 
 def _compose(*functions):
