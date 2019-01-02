@@ -15,7 +15,8 @@ from random import randint, sample
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 import os
 from urllib.parse import quote, unquote
-
+from .helper import running_sever_fixture, st_hpath_list
+from shallot.middlewares import wrap_static
 
 encoding = sys.getfilesystemencoding()
 
@@ -23,36 +24,12 @@ __here__ = os.path.dirname(__file__)
 __test_data__ = "../test/data"
 
 
-@pytest.fixture
-def running_server():
-    handler = apply_middleware(wrap_static(__test_data__, __here__))(noop_handler)
-    server = build_server(handler)
-    ip_port = ("127.0.0.1", 8550)
-    process = Process(target=lambda: uvicorn.run(server, *ip_port))
-    process.start()
-    time.sleep(1)
-    yield f"http://{ip_port[0]}:{ip_port[1]}/"
-    process.terminate()
-    time.sleep(1)
-
-
-# ------ rfc1738 definitions --------------
-alpha = string.ascii_letters
-digits = string.digits
-safe = "$-_.+"
-
-st_unreserved = st.text(alphabet=alpha) | st.text(alphabet=digits) | st.text(alphabet=safe)
-st_escape = st.from_regex(r"^%[0-9a-fA-F]{2}$")
-st_uchar = st_unreserved | st_escape
-
-st_hsegment = st_uchar | st.text(alphabet=";:@&=")
-st_hpath_list = st.lists(st_hsegment)
-
-# -------------------------------------------
-
-
 async def noop_handler(request):
     return {"status": 218, "body": request["path"].encode()}
+
+
+handler = apply_middleware(wrap_static(__test_data__, __here__))(noop_handler)
+running_server = running_sever_fixture(handler)
 
 
 @given(st.text())
@@ -83,10 +60,10 @@ def with_retry(func):
             return result
     return result 
 
+
 @given(url_path=st.text().filter(is_url_encodeable), content=st.binary(min_size=0, max_size=10*6))
 @settings(max_examples=2000)
 def test_all_urlencodeable_filenames_can_be_served_via_statics(running_server, url_path, content):
-    # print("Quoted test-path: ", url_path)
     path = url_path
     base_dir, fname = os.path.split(path)
     statics_folder = os.path.join(__here__, __test_data__)
@@ -123,7 +100,7 @@ def test_files_can_be_arbitrary_encoded(url_path):
 
 
 @given(url_path=st.text().filter(is_url_encodeable))
-@settings(max_examples=5000)
+@settings(max_examples=2000)
 def test_requests_works_as_expected(running_server, url_path):
     response = requests.get(running_server + url_path)
     assert response.status_code == 218
