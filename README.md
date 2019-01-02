@@ -137,13 +137,13 @@ The routing-middleware is somewhat special, to other middlewares. It does not en
 routing is one essential and by far, the most opinonated part of any webframeworks-api. `shallot` is there no exception. Routing is defined completely via a data-structure:
 
 ```python
-...
-
 async def hello_world(request):
     return text("hi user!")
 
+# is attached to a "dynamic"-route with one parseable url-part
 async def handle_index(request, idx):
     return text(f"hi user number: {idx}")
+
 
 routes = [
     ("/", ["GET"], hello_world),
@@ -183,7 +183,92 @@ async def json_handler(request):
     return json({"hello": "world"})
 ```
 
-### static-files
+### Parameters
+parameters are url-encoded query-strings or bodies. To automatically parse this data use the `wrap_parameters` - middleware
+```python
+
+from shallot.middlewars import wrap_parameters
+build_server(apply_middleware(
+    wrap_parameters(keep_blank_values=False, strict_parsing=False, encoding='utf-8')
+) (handler))
+```
+Parameters (url-query or form-body-data) is parsed to a `dict`. The value(s) are added to a list. The middleware is mostly a wrapper to the python-builtin [urllib.parse.parse_qs](https://docs.python.org/3/library/urllib.parse.html#urllib.parse.parse_qs). All parameters to `wrap_parameters` are passed to `parse_qs`. 
+
+This middleware will add 3 keys to the request. URL-query-strings  will be parsed and added to `query_params`. If the body is sent with the content-type `application/x-www-form-urlencoded`, the body will parsed and added to `form_params`. The result of merging `query_params` and `form_params` will be added to the `params`-key.
+
+```python
+async def return_request(request):
+    return request
+
+
+handle_request = apply_middleware(wrap_parameters())(return_request)
+
+url_request = {"query_string": b"key1=0&p2=val&p2=9"}
+print(handle_request(url_request))
+>> {
+    "query_string": b"p2=9&key1=0&p2=val",
+    "query_params": {
+        "key1": ["0"],
+        "p2": ["9", "val"]
+    },
+    "form_params": {},
+    "params": {
+        "key1": ["0"],
+        "p2": ["9", "val"]
+    },
+}
+
+form_request = {
+    "headers": {"content-type": "application/x-www-form-urlencoded"},
+    "body": b"p2=9&key1=0&p2=val" 
+}
+
+print(handle_request(form_request))
+>> {
+    "body": b"p2=9&key1=0&p2=val",
+    "query_params": {},
+    "form_params": {
+        "key1": ["0"],
+        "p2": ["9", "val"]
+    },
+    "params": {
+        "key1": ["0"],
+        "p2": ["9", "val"]
+    },
+}
+
+
+mixed_request = {
+    "query_string": b"u1=0&u8=3",
+    "headers": {"content-type": "application/x-www-form-urlencoded"},
+    "body": b"p2=9&key1=0&p2=val",
+} 
+print(handle_request(mixed_request))
+>> {
+    "body": b"p2=9&key1=0&p2=val",
+    "query_string": b"u1=0&u8=3",
+
+    "query_params": {
+        "u1": ["0"],
+        "u8": ["val"],
+    },
+    "form_params": {
+        "key1": ["0"],
+        "p2": ["9", "val"]
+    },
+    "params": {
+        "key1": ["0"],
+        "p2": ["9", "val"],
+        "u1": ["0"],
+        "u8": ["val"],
+    },
+}
+```
+
+*The values are treated as list on purpose. Because every key can be sent multiple-times, it is better to consequently deal with lists. Otherwise an application would have to handle 2 different types (which both support iterating/indexing), rather than with different-length lists.*
+
+
+### Static-Files
 
 `shallot` is not optimized to work as static-file-server. Altough it goes to great length, to provide a solid experience for serving static content.
 
