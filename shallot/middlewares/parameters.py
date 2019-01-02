@@ -1,7 +1,8 @@
 from urllib.parse import parse_qs
 
 
-def wrap_parameters(keep_blank_values=False, strict_parsing=False, errors='replace', encoding='utf-8'):
+
+def wrap_parameters(keep_blank_values=False, strict_parsing=False, encoding='utf-8'):
     def middleware(next_middleware):
         async def _wrap_params(handler, request):
             qs = request.get("query_string")
@@ -11,7 +12,6 @@ def wrap_parameters(keep_blank_values=False, strict_parsing=False, errors='repla
                     qs, 
                     keep_blank_values=keep_blank_values, 
                     strict_parsing=strict_parsing, 
-                    errors=errors,
                     encoding=encoding
                 )
             else:
@@ -22,7 +22,6 @@ def wrap_parameters(keep_blank_values=False, strict_parsing=False, errors='repla
                     request["body"].decode(encoding), 
                     keep_blank_values=keep_blank_values, 
                     strict_parsing=strict_parsing, 
-                    errors=errors,
                     encoding=encoding
                 )
             else: 
