@@ -130,7 +130,7 @@ Nothing is enabled by default. Every functionality has its own middleware.
 ### Routing
 To include `shallot` builtin routing use the routing-middleware: `wrap_routes`:
 ```python
-build_server(apply_middleware(wrap_routes(routes)(default_handler)))
+build_server(apply_middleware(wrap_routes(routes))(default_handler))
 ```
 The routing-middleware is somewhat special, to other middlewares. It does not enhance the request/response, but chooses a new handler for the specific request. If the router can't find a matching handler for the route, then the `default_handler` will be transfered into the next middleware(s).
 

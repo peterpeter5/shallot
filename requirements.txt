@@ -7,3 +7,4 @@ requests
 wheel
 setuptools
 pytest-asyncio
+sphinx
