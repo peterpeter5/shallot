@@ -65,11 +65,18 @@ templates_path = ['_templates']
     #'.rst': 'restructuredtext',
     # '.md': 'markdown',
 #} 
-from recommonmark.parser import CommonMarkParser
-source_parsers = {
-    '.md': CommonMarkParser,
-}
-source_suffix = ['.rst', '.md']
+import os
+if not os.environ.get("_LOCAL_DOCS_BUILD_"):  # RTD-Build
+    from recommonmark.parser import CommonMarkParser
+    source_parsers = {
+        '.md': CommonMarkParser,
+    }
+    source_suffix = ['.rst', '.md']
+else:
+    source_suffix = {
+        '.rst': 'restructuredtext',
+        '.md': 'markdown',
+    }
 # The master toctree document.
 master_doc = 'index'
 

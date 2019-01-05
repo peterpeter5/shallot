@@ -25,7 +25,8 @@ setuptools.setup(
     install_requires=["aiofiles"],
     extras_require={
         "full": full_requires,
-        "test":  test_requires + full_requires
+        "test":  test_requires + full_requires,
+        "docs": ["sphinx", "recommonmark"]
     },
     classifiers=[
         "Programming Language :: Python :: 3",
