@@ -7,7 +7,7 @@ clean:
 testvenv:
 	python -m venv .testvenv
 
-build:
+build: **.py
 	python setup.py build bdist_wheel
 
 install: testvenv
@@ -22,10 +22,7 @@ unittest-package: install-pytest testvenv
 	source .testvenv/bin/activate; \
 	pytest ./test;
 
-integrationtest-package: testvenv
+integrationtest-package: build testvenv
 	source .testvenv/bin/activate; \
 	pip install $(DIST)[test]; \
 	pytest ./integration_test ./test
-	
-
-

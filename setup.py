@@ -28,6 +28,7 @@ setuptools.setup(
         "test":  test_requires + full_requires,
         "docs": ["sphinx", "recommonmark"]
     },
+    python_requires=">=3.6",
     classifiers=[
         "Programming Language :: Python :: 3",
     ],
