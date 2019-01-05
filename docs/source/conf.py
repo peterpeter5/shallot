@@ -65,6 +65,10 @@ templates_path = ['_templates']
     #'.rst': 'restructuredtext',
     # '.md': 'markdown',
 #} 
+from recommonmark.parser import CommonMarkParser
+source_parsers = {
+    '.md': CommonMarkParser,
+}
 source_suffix = ['.rst', '.md']
 # The master toctree document.
 master_doc = 'index'
