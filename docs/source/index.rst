@@ -2,8 +2,20 @@
 Welcome to shallot's documentation!
 ===================================
 
+Introduction:
++++++++++++++
+
 .. toctree::
+   :caption: Intro:
    :maxdepth: 2
+   
+   basic-concepts
+
+Usage-guide:
++++++++++++++
+
+.. toctree::
+   :maxdepth: 1
    :caption: HowTo - do:
 
    Routing <routing>
@@ -12,6 +24,7 @@ Welcome to shallot's documentation!
    Static-Files <staticfiles>
    Response content-type <content-type>
    Cookies <cookies>
+
 
 
 Indices and tables
