@@ -4,6 +4,7 @@ from .cookies import wrap_cookies
 from .json import wrap_json
 from .parameters import wrap_parameters
 from .staticfiles import wrap_static
+from .routing import wrap_routes
 
 
 def _compose(*functions):
