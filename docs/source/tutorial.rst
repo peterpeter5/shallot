@@ -372,3 +372,83 @@ as the response. What did we do to make this happen:
 1. we created an additional route "/fruits/{name}". This route contains a "wildcard". This is signaled via `{anything-in-between}`. When a request is made to this route, than everything after "/fruits/" will be parsed as string and passed to the handler as arguments. 
 2. we added a new handler `fruit_details` with 2 parameters (`request` and `fruit_name`)
 
+So when we make a get-request "/fruits/apples", `apples` get parsed from the
+`path` of the `request` and the `fruit_details` - function will be called with
+the `request`-dict and `apples`. 
+
+Lastly we'll have to implement the "change-quantity" - functionality. Therefore
+we add a new route and handler-function:
+
+.. code-block:: python
+
+    from shallot import build_server
+    from shallot.response import text, json
+    from shallot.middlewares import apply_middleware, wrap_json, wrap_routes
+
+
+    async def not_found(request):
+        return text("Not Found", 404)
+
+    fruit_store = {
+        "oranges": {"descr": "an orange ball", "qty": 0, "name": "orange"}, 
+        "apples": {"descr": "an green or red ball", "qty": 0, "name": "apple"}
+    }
+
+
+    async def fruit_collection(request):
+        return json({"fruits": list(fruit_store.keys())})
+
+
+    async def fruit_details(request, fruit_name):
+        return json(fruit_store[fruit_name])
+
+    async def change_quantity(request):
+        data = request["json"]
+        for fruit_name, new_qt in data.items():
+            fruit_store[fruit_name]["qty"] = new_qt
+        return  json({"updated": list(data.keys())})
+
+    routes = [
+        ("/fruits", ["GET"], fruit_collection),
+        ("/fruits/{name}", ["GET"], fruit_details),
+        ("/fruits", ["POST"], change_quantity)
+    ]
+
+
+    middlewares = apply_middleware(
+        wrap_json,
+        wrap_routes(routes)
+    )
+    fruit_app = build_server(middlewares(not_found))
+
+    if __name__ == "__main__":
+        import uvicorn
+        uvicorn.run(fruit_app, "127.0.0.1", 5000, debug=True)
+
+
+There are 2 things to note here. First we added a new routing-table entry, the third one, with
+the same path as the first. This is ok, because the http-methods are differnt.
+Second in the `change_quantity` - funcition we access the `json`-key from the `request-dict`.
+This is possible, because we used the `wrap_json` - middleware. This middleware
+parses JSON-requests for you and attaches the result to the `"json"` key of 
+the `request-dict`. 
+
+Next we make a post-request to "http://127.0.0.1:5000/fruits" with:
+
+.. code-block:: python
+
+    { "oranges": 3, "apples": 900}
+
+and we should see:
+
+.. code-block:: python 
+
+    { "updated": ["oranges", "apples"]}
+
+as the response. When revisiting the details-view of apples, we should see
+the changed `quantity` too.
+
+For more information about routing and JSON refer to the documentation:
+
+- :doc:`json`
+- :doc:`routing`

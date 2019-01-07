@@ -19,9 +19,16 @@ async def fruit_collection(request):
 async def fruit_details(request, fruit_name):
     return json(fruit_store[fruit_name])
 
+async def change_quantity(request):
+    data = request["json"]
+    for fruit_name, new_qt in data.items():
+        fruit_store[fruit_name]["qty"] = new_qt
+    return  json({"updated": list(data.keys())})
+
 routes = [
     ("/fruits", ["GET"], fruit_collection),
-    ("/fruits/{name}", ["GET"], fruit_details)
+    ("/fruits/{name}", ["GET"], fruit_details),
+    ("/fruits", ["POST"], change_quantity)
 ]
 
 
