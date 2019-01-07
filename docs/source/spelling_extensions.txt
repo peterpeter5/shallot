@@ -15,3 +15,8 @@ ASGI
 composeable
 deployable
 async
+CPython
+webserver
+favicon
+ico
+dev

@@ -10,6 +10,7 @@ Introduction:
    :maxdepth: 2
    
    basic-concepts
+   tutorial
 
 Usage-guide:
 +++++++++++++
