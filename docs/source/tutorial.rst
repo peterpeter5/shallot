@@ -318,7 +318,7 @@ enough, it should render it as JSON.
 
 .. note:: 
     From now on, you should use a proper tool to debug your rest-api. You can 
-    use pyhton with the execellent `requests-package <http://docs.python-requests.org/en/master/>`_ or any 
+    use python with the excellent `requests-package <http://docs.python-requests.org/en/master/>`_ or any 
     graphical rest-client you like.
 
 As the next step we implement our details-view: 
@@ -427,8 +427,8 @@ we add a new route and handler-function:
 
 
 There are 2 things to note here. First we added a new routing-table entry, the third one, with
-the same path as the first. This is ok, because the http-methods are differnt.
-Second in the `change_quantity` - funcition we access the `json`-key from the `request-dict`.
+the same path as the first. This is OK, because the http-methods are different.
+Second in the `change_quantity` - function we access the `json`-key from the `request-dict`.
 This is possible, because we used the `wrap_json` - middleware. This middleware
 parses JSON-requests for you and attaches the result to the `"json"` key of 
 the `request-dict`. 
