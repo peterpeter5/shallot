@@ -2,13 +2,13 @@
 
 ## What is a shallot?
 
-It is a small onion. It has only small and few layers. When you use it (cut it for cocking), it does not make 
+It is a small onion. It has only small and few layers. When you use it (cut it for cooking), it does not make 
 you cry (that much).
 
 The above description of the vegetable, is a good misson-statement for what `shallot` (the [micro-] "webframework") tries to be. 
 
 `shallot` is a small layer on top of an ASGI - compatible server, like: uvicorn, hypercorn, ... It is haveliy inspired 
-by [ring](https://github.com/ring-clojure/ring). The main differnce to other webframeworks is, that `shallot` is easly pugable and extensible. Every component can be switched and new features can be added without touching `shallot`s source-code. That is accomplished by using middlewares for every functionality in `shallot`.
+by [ring](https://github.com/ring-clojure/ring). The main differnce to other webframeworks is, that `shallot` is easly pugable and extensible. Every component can be switched and new features can be added without touching `shallot`s source-code. That is accomplished by using middlewares for nearly every functionality in `shallot`.
 
 ## Architecture
 
