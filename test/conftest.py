@@ -8,3 +8,6 @@ def pytest_unconfigure(config):
     import sys
 
     del sys._pytest_
+
+
+pytest_plugins = 'pytester'

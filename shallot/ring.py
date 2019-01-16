@@ -3,6 +3,7 @@ from shallot.response import filestream
 from asyncio import wait_for
 import sys
 from itertools import chain
+from functools import partial
 
 __pytest__ = hasattr(sys, "_pytest_")
 
@@ -98,22 +99,27 @@ def build_server(handler, max_responde_timeout_s=30, max_receive_timeout_s=15):
         async def handle_handler(receive, send):
             headers_list = context.get('headers', [])
             headers = make_headers_map(headers_list)
-            body = await wait_for(consume_body(receive), max_receive_timeout_s)
-            server_name, server_port = context.get('server', (None, None))
+            body = await wait_for(consume_body(receive), max_receive_timeout_s) if not context["type"] == "websocket" else b""
+            method = context.get("method") if not context["type"] == "websocket" else "WS"
             request = {
                 **context,
-                "headers": headers, 'body': body, 'headers_list': headers_list,
-                "server_name": server_name, "server_port": server_port
+                "headers": headers, 
+                'body': body, 
+                'headers_list': headers_list,
+                "method": method
             }
 
             response = await handler(request)
-            # TOOO validate response!
-            await wait_for(responde_client(send, response), max_responde_timeout_s)
+            if callable(response):
+                await response(receive, send)
+            else:
+                await wait_for(responde_client(send, response), max_responde_timeout_s)
             if __pytest__:
                 return response
+
         if "type" not in context:
-            raise NotImplementedError("no type in context! error for %s" % context)
-        if context["type"] in {"http"}:
+            raise NotImplementedError("no type in scope! error for %s" % context)
+        if context["type"] in {"http", "websocket"}:
             return handle_handler
         else:
             return noop
