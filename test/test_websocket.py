@@ -1,14 +1,16 @@
 import pytest
-from shallot import build_server
-from shallot.websocket import _build_receiver, WSDisconnect
+from shallot import build_server, websocket
+from shallot.websocket import _build_receiver, WSDisconnect, _ws_async_generator_client
+from shallot.response import ws_send, ws_close
+from unittest.mock import Mock, call
 
 
 @pytest.fixture
 def disable_conftest():
     import sys
-    del sys._pytest_
+    del sys._pytest_shallot_
     yield 
-    sys._pytest_ = True
+    sys._pytest_shallot_ = True
 
 
 async def receive_raise():
@@ -30,6 +32,11 @@ async def raw_asgi_handler(receive, send):
 async def raw_asgi_wrapper(scope):
     return raw_asgi_handler
 
+def _mock_awaitable(func):
+    async def awaitable(*args, **kwargs):
+        return func(*args, **kwargs)
+    return awaitable
+
 
 def ws_receive(data):
     key = "bytes" if isinstance(data, bytes) else "text"
@@ -37,13 +44,9 @@ def ws_receive(data):
 
 
 def receive_func_from_coll(coll):
-    async def _gen():
-        for item in coll:
-            yield item
-    gen = _gen()
-    
-    return gen.__anext__
-
+    mock = Mock()
+    mock.side_effect = list(coll) + [StopAsyncIteration]
+    return _mock_awaitable(mock)
 
 
 @pytest.mark.asyncio
@@ -67,8 +70,7 @@ async def test_receiver_returns_only_data():
     receive_msgs = map(ws_receive, expected_result)
     result = [
         a 
-        async for a in _build_receiver(
-            receive_func_from_coll(receive_msgs))
+        async for a in _build_receiver(receive_func_from_coll(receive_msgs))
     ]
     assert expected_result == result
 
@@ -125,9 +127,204 @@ async def test_receiver_raises_ws_connection_error_on_unsupported_message():
     ]
     receiver = _build_receiver(receive_func_from_coll(message_stream))
     with pytest.raises(ConnectionError):
-        msg = await receiver.__anext__()
+        _ = await receiver.__anext__()
 
 
 @pytest.mark.asyncio
-async def test_gen_strategy(parameter_list):
+async def test_ws_servers_that_provide_missing_data_in_receiver_yield_conenction_error():
+    receiver =  _build_receiver(receive_func_from_coll(
+        [
+            {"type": "websocket.receive",},
+        ]))
+    with pytest.raises(ConnectionError):
+        _ = await receiver.__anext__()
+
+
+
+@pytest.mark.asyncio
+async def test_gen_strategy_will_send_every_message_that_gets_yielded():
+    async def ws_echo_handler(scope, receiver):
+        async for msg in receiver:
+            yield ws_receive(msg)
+
+    sender = Mock().send
+    async_sender = _mock_awaitable(sender)
+    fake_messages = list(map(ws_receive, ["a", b"", "1", b"2"]))
+    receiver = receive_func_from_coll(fake_messages)
+    await _ws_async_generator_client(
+        ws_echo_handler,
+        {},
+        tuple(),
+        receiver,
+        async_sender
+        )
+    sender.assert_has_calls(list(map(call, fake_messages)))
+
+@pytest.mark.asyncio
+async def test_close_gets_automatically_sended_when_client_stops_yielding_messages():
+    async def ws_close_immediately(scope, receiver):
+        yield ws_send("adf")
+
+    sender = Mock().send
+    async_sender = _mock_awaitable(sender)
+    fake_messages = list(map(ws_receive, ["a"]))
+    receiver = receive_func_from_coll(fake_messages)
+    await _ws_async_generator_client(
+        ws_close_immediately,
+        {},
+        tuple(),
+        receiver,
+        async_sender
+        )
+    assert sender.call_args_list == list(map(call, [ws_send("adf"), {"type": "websocket.close", "code": 1000}]))
+
+
+@pytest.mark.asyncio
+async def test_close_will_only_get_once_when_client_yields_a_close():
+    async def ws_close_actively(scope, receiver):
+        yield ws_close(2000)
+
+    sender = Mock().send
+    async_sender = _mock_awaitable(sender)
+    fake_messages = list(map(ws_receive, ["a"]))
+    receiver = receive_func_from_coll(fake_messages)
+    await _ws_async_generator_client(
+        ws_close_actively,
+        {},
+        tuple(),
+        receiver,
+        async_sender
+        )
+    assert sender.call_args_list == list(map(call, [{"type": "websocket.close", "code": 2000}]))
+
+
+@websocket
+async def send_2_messages(scope, receive):
+    for index in range(2):
+        yield ws_send(str(index))
+
+
+async def close_immediatly(scope, receive):
+    yield ws_close()
+
+
+async def disconnect_immediatly(scope, receive):
+    raise WSDisconnect("sorry! wrong number!")
+    yield  # unreacheable but makes the function an interator
+
+
+async def _on_dis_ignore(scope):
     pass
+
+
+@websocket(on_disconnect=_on_dis_ignore)
+async def raise_ws_disconnect_simulate_client_disconnect_with_custom_disconnect_handler(scope, receive):
+    yield ws_send("this is good")
+    raise WSDisconnect("Good Bye")
+
+
+@websocket()
+async def raise_ws_disconnect_simulate_client_disconnect(scope, receive):
+    yield ws_send("this is good")
+    raise WSDisconnect("Good Bye")
+
+
+async def run_ws_handler_with_messages(handler, messages, scope_type="websocket"):
+    scope = {"type": scope_type}
+    sender = Mock().send
+    async_sender = _mock_awaitable(sender)
+    receiver = receive_func_from_coll(messages)
+    initialized_handler = await handler(scope)
+    await initialized_handler(receiver, async_sender)
+    return sender.call_args_list
+
+@pytest.mark.asyncio
+async def test_ws_handler_raises_error_when_handshake_msg_is_missing():
+
+    with pytest.raises(ConnectionError):
+        await run_ws_handler_with_messages(
+            send_2_messages,
+            list(map(ws_receive, ["1"]))
+        )
+
+@pytest.mark.asyncio
+async def test_ws_handler_raises_error_when_called_outside_ws_scope():
+    with pytest.raises(ConnectionError):
+        _ = await run_ws_handler_with_messages(
+            send_2_messages,
+            list(map(ws_receive, ["1"])),
+            scope_type="http"
+        )
+
+
+@pytest.mark.asyncio
+async def test_ws_handler_raising_ws_disconnect_does_not_leak_outside_custom():
+
+    sended_messages = await run_ws_handler_with_messages(
+        raise_ws_disconnect_simulate_client_disconnect_with_custom_disconnect_handler,
+        [
+            {"type": "websocket.connect"},
+            ws_receive("mb:lisa"),
+        ],
+    )
+    assert sended_messages == [call({"type": "websocket.accept"}), call(ws_send("this is good"))] 
+
+
+@pytest.mark.asyncio
+async def test_ws_handler_raising_ws_disconnect_does_not_leak_outside():
+
+    sended_messages = await run_ws_handler_with_messages(
+        raise_ws_disconnect_simulate_client_disconnect,
+        [
+            {"type": "websocket.connect"},
+            ws_receive("mb:lisa"),
+        ],
+    )
+    assert sended_messages == [call({"type": "websocket.accept"}), call(ws_send("this is good"))] 
+
+
+@pytest.mark.asyncio
+async def test_ws_handler_default_will_accept_every_connect():
+    sended_messages = await run_ws_handler_with_messages(
+        websocket(close_immediatly),
+        [{"type": "websocket.connect"}],
+        scope_type="websocket"
+    )
+    assert sended_messages == [call({"type": "websocket.accept"}), call(ws_close())]
+
+
+@pytest.mark.asyncio
+async def test_ws_handler_can_have_custom_on_conenct():
+    async def never_accept_connect(scope):
+        return ws_close()
+
+    sended_messages = await run_ws_handler_with_messages(
+        websocket(close_immediatly, on_connect=never_accept_connect),
+        [{"type": "websocket.connect"}],
+        scope_type="websocket"
+    )
+    assert sended_messages == [call(ws_close())]
+
+
+@pytest.mark.asyncio
+async def test_ws_handler_can_have_custom_on_disconnect():
+    disconnect = Mock()
+
+    _ = await run_ws_handler_with_messages(
+        websocket(disconnect_immediatly, on_disconnect=_mock_awaitable(disconnect)),
+        [{"type": "websocket.connect"}],
+        scope_type="websocket"
+    )
+    disconnect.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_ws_handler_can_have_custom_on_close():
+    close = Mock()
+
+    _ = await run_ws_handler_with_messages(
+        websocket(close_immediatly, on_close=_mock_awaitable(close)),
+        [{"type": "websocket.connect"}],
+        scope_type="websocket"
+    )
+    close.assert_called_once()
