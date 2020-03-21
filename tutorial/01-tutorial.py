@@ -20,4 +20,4 @@ hello_world_app = build_server(greet_and_static_handler)
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(hello_world_app, "127.0.0.1", 5000, debug=True)
+    uvicorn.run(hello_world_app, host="127.0.0.1", port=5000, debug=True)
