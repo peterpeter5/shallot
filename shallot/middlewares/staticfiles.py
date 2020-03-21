@@ -1,11 +1,9 @@
 import os
 import re
-from urllib.parse import unquote
 from shallot.response import respond404, filestream, respond_not_modified
 from aiofiles.os import stat as astat
 from email.utils import formatdate
 from hashlib import md5
-import stat
 
 
 def validate_dir_path(path):
@@ -22,18 +20,14 @@ def make_caching_headers(filestats):
     return {
         "last-modified": formatdate(filestats.st_mtime, usegmt=True),
         "content-length": str(filestats.st_size),
-        "etag":  etag
+        "etag": etag,
     }
 
 
 def extract_matching_cache(client_headers):
     last_modified = client_headers.get("if-modified-since")
     etag = client_headers.get("if-none-match")
-    return {
-        k: v
-        for k, v in [("last-modified", last_modified), ("etag", etag)]
-        if v is not None
-    }
+    return {k: v for k, v in [("last-modified", last_modified), ("etag", etag)] if v is not None}
 
 
 def wrap_static(static_folder, root_path="."):
@@ -45,16 +39,14 @@ def wrap_static(static_folder, root_path="."):
 
     def wrap_static_files(next_middleware):
         async def _handle_request(handler, request):
-            if request['method'] not in {"GET", "HEAD"}:
+            if request["method"] not in {"GET", "HEAD"}:
                 return await next_middleware(handler, request)
 
-            raw_path = request['path']
+            raw_path = request["path"]
             if "../" in raw_path:
                 return respond404()
 
-            requested_path = os.path.abspath(os.path.join(
-                root_path, *static_folder, re.sub("^[/]*", "", raw_path))
-            )
+            requested_path = os.path.abspath(os.path.join(root_path, *static_folder, re.sub("^[/]*", "", raw_path)))
             if not (requested_path.startswith(root_to_check_against) and file_exists(requested_path)):
                 return await next_middleware(handler, request)
 
@@ -62,10 +54,12 @@ def wrap_static(static_folder, root_path="."):
 
             caching_headers = make_caching_headers(fstat)
             client_caching_headers = extract_matching_cache(request.get("headers", {}))
+
             if client_caching_headers and client_caching_headers.items() <= caching_headers.items():
                 return respond_not_modified(caching_headers)
             else:
                 return filestream(requested_path, headers=caching_headers)
 
         return _handle_request
+
     return wrap_static_files

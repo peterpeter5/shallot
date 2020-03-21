@@ -1,7 +1,7 @@
+# flake8: noqa F401
 from .ring import build_server
 from .websocket import websocket, WSDisconnect
 from . import response as _response
-
 
 
 async def standard_not_found(request):

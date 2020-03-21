@@ -1,7 +1,6 @@
 from http.cookies import SimpleCookie, CookieError, Morsel
 from urllib.parse import quote
 from wsgiref.handlers import format_date_time
-import time
 
 
 def make_morsel_from_description(name, descr):
@@ -34,10 +33,7 @@ class CookieSerializer:
         self._morsels = morsels
 
     def items(self):
-        return (
-            m.output().split(": ")
-            for m in self._morsels
-        )
+        return (m.output().split(": ") for m in self._morsels)
 
 
 def wrap_cookies(next_middleware):
@@ -57,7 +53,8 @@ def wrap_cookies(next_middleware):
 
         response_cookies = CookieSerializer(
             make_morsel_from_description(name, descr) if descr is not None else make_unset_morsel(name)
-            for name, descr in response.get("cookies", {}).items())
+            for name, descr in response.get("cookies", {}).items()
+        )
         response["cookies"] = response_cookies
         return response
 

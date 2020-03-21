@@ -1,3 +1,4 @@
+# flake8: noqa F401
 from functools import partial, reduce
 from .content_type import wrap_content_type
 from .cookies import wrap_cookies
@@ -18,9 +19,9 @@ def _compose(*functions):
     """
 
     def compose_two_funcs(func1, func2):
-
         def _composition(*args, **kwargs):
             return func2(func1(*args, **kwargs))
+
         return _composition
 
     def composition(*args, **kwargs):
@@ -39,6 +40,7 @@ def apply_middleware(*middlewares):
     :param middlewares: middleware-functions to wrap-up 
     :return: wrapper-function to use with handler -> server
     """
+
     async def exectue_handler(_handler, request):
         return await _handler(request)
 
@@ -46,4 +48,5 @@ def apply_middleware(*middlewares):
         call_chain = middlewares
         chained_dispatcher = _compose(*call_chain)(exectue_handler)
         return partial(chained_dispatcher, handler)
+
     return _wrap_handler

@@ -1,11 +1,10 @@
-import re
 from mimetypes import guess_type, add_type
 
 
-def wrap_content_type(additional_content_types=None, default_content_type="application/octet-stream", strict=False):
-    """
-    :param additional_content_types: 
-    """
+def wrap_content_type(
+    additional_content_types=None, default_content_type="application/octet-stream", strict=False,
+):
+
     additional_content_types = {} if additional_content_types is None else additional_content_types
     for cont_type, extensions in additional_content_types.items():
         for ext in extensions:
@@ -27,4 +26,5 @@ def wrap_content_type(additional_content_types=None, default_content_type="appli
             return response
 
         return add_content_type
+
     return wrap_handler

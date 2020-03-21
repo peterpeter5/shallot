@@ -36,14 +36,8 @@ def build_static_router(routing_table):
     static_router = {}
     for route, methods, dispatch in static_routs:
         methods_before = static_router.get(route, {})
-        new_methods = {
-            meth: dispatch
-            for meth in methods
-        }
-        static_router[route] = {
-            **methods_before,
-            **new_methods
-        }
+        new_methods = {meth: dispatch for meth in methods}
+        static_router[route] = {**methods_before, **new_methods}
     return static_router
 
 
@@ -54,10 +48,7 @@ def build_dynamic_router(routing_table):
         regex_path = re.sub(r"\{(.+)\}", "(.*)", route)
         num_slashes = route.count("/")
         old_methods = dyn_router.get(num_slashes, {}).get(regex_path, {})
-        new_methods = {
-            meth: dispatch
-            for meth in methods
-        }
+        new_methods = {meth: dispatch for meth in methods}
         dyn_router[num_slashes].update({regex_path: {**old_methods, **new_methods}})
     return dyn_router
 
@@ -96,5 +87,7 @@ def wrap_routes(routing_table):
                 return await next_middleware(handler, request)
             else:
                 return await next_middleware(RPartial(new_handler, args), request)
+
         return dispatch_handler
+
     return wrap_middleware
