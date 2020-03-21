@@ -19,11 +19,13 @@ async def fruit_collection(request):
 async def fruit_details(request, fruit_name):
     return json(fruit_store[fruit_name])
 
+
 async def change_quantity(request):
     data = request["json"]
     for fruit_name, new_qt in data.items():
         fruit_store[fruit_name]["qty"] = new_qt
     return  json({"updated": list(data.keys())})
+
 
 routes = [
     ("/fruits", ["GET"], fruit_collection),
@@ -40,4 +42,4 @@ fruit_app = build_server(middlewares(not_found))
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(fruit_app, "127.0.0.1", 5000, debug=True)
+    uvicorn.run(fruit_app, host="127.0.0.1", port=5000, debug=True)

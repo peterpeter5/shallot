@@ -52,3 +52,24 @@ def json(data, status=200):
             "content-length": f"{len(transfer_body)}"
         }
     }
+
+
+
+# -------------- WEBSOCKET - FUNCS ------------------------------------
+
+
+def ws_send(data):
+    if not isinstance(data, (str, bytes)):
+        raise TypeError(f"Can NOT send data of type: {type(data)}! Possible types are: [bytes | str].")
+    key = "text" if isinstance(data, str) else "bytes"
+    return {key: data, "type": "websocket.send"}
+
+
+def ws_close(code=1000):
+    if not isinstance(code, int):
+        raise TypeError(f"The exit code must be <int>. But not {type(code)}!")
+    return {"type": "websocket.close", "code": code}
+
+
+def ws_accept(subprotocol=None):
+    return {"type": "websocket.accept", "subprotocol": subprotocol}
