@@ -4,8 +4,9 @@ from asyncio import wait_for
 import sys
 from itertools import chain
 from functools import partial
+import logging
 
-__pytest__ = hasattr(sys, "_pytest_")
+__pytest__ = hasattr(sys, "_pytest_shallot_")
 
 
 def unicode2(xys, encoding="utf-8"):
@@ -21,7 +22,7 @@ def lowercase_key(xys):
 def make_headers_map(headers):
     """
     all header-fields are joined here! This is against:  RFC 7230 and RFC 6265 (Coockies)
-    However: the final request will provide the original-headers-list. So this convinient is ok! 
+    However: the final request will provide the original-headers-list. So this convenient is ok! 
     """
     acc = defaultdict(list)
     for key, value in map(lambda xy: lowercase_key(unicode2(xy)), headers):
@@ -122,5 +123,6 @@ def build_server(handler, max_responde_timeout_s=30, max_receive_timeout_s=15):
         if context["type"] in {"http", "websocket"}:
             return handle_handler
         else:
+            logging.warn(f"scope:type: {context['type']} currently not supported")
             return noop
     return request_start
