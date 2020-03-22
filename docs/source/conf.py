@@ -68,11 +68,13 @@ templates_path = ['_templates']
 import os
 if not os.environ.get("_LOCAL_DOCS_BUILD_"):  # RTD-Build
     from recommonmark.parser import CommonMarkParser
+    from recommonmark.transform import AutoStructify
  
     source_suffix = {
         '.rst': 'restructuredtext',
         '.md': CommonMarkParser,
     }
+    source_suffix = ['.rst', '.md']
 else:
     source_suffix = {
         '.rst': 'restructuredtext',
@@ -213,11 +215,11 @@ todo_include_todos = True
 
 # -- Markdown - extras -------------------------------------
 from recommonmark.transform import AutoStructify
-github_doc_root = 'https://github.com/rtfd/recommonmark/tree/master/doc/'
+github_doc_root = 'https://github.com/peterpeter5/shallot/tree/master/'
 
 def setup(app):
     app.add_config_value('recommonmark_config', {
-            #'url_resolver': lambda url: github_doc_root + url,
+            # 'url_resolver': lambda url: github_doc_root + url,
             'auto_toc_tree_section': 'Contents',
             }, True)
     app.add_transform(AutoStructify)
