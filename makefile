@@ -26,3 +26,11 @@ integrationtest-package: build testvenv
 	source .testvenv/bin/activate; \
 	pip install $(DIST)[test]; \
 	pytest ./integration_test ./test
+
+format-check:
+	black --line-length=120 shallot/
+	flake8 shallot/*
+
+test: format-check
+	pytest --cov=shallot --cov-report html --cov-report term test/ 
+

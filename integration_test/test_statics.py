@@ -99,7 +99,7 @@ def test_files_can_be_arbitrary_encoded(url_path):
         assert url_path in files
 
 
-@given(url_path=st.text().filter(is_url_encodeable))
+@given(url_path=st.text().filter(is_url_encodeable).filter(lambda x: x not in {".", ".."}))
 @settings(max_examples=2000)
 def test_requests_works_as_expected(running_server, url_path):
     response = requests.get(running_server + url_path)

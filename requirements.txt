@@ -1,4 +1,3 @@
-autopep8
 aiofiles
 uvicorn
 hypothesis
@@ -10,3 +9,5 @@ pytest-asyncio
 sphinx
 recommonmark
 pytest-cov
+black
+flake8-bugbear

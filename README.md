@@ -372,7 +372,7 @@ the key is the content-type to map to, and the value is a list of extensions (wi
 
 ### Cookies
 
-Cookies are handled as dicts. To use cookie-handling one must include `wrap_cookies` in the middleware-chain.
+Cookies are handled as `dicts`. To use cookie-handling one must include `wrap_cookies` in the middleware-chain.
 
 ```python
 build_server(apply_middleware(wrap_cookies)(handler))

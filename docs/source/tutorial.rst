@@ -42,7 +42,7 @@ To do that we create file called `00-tutorial.py` and write our first handler:
 
     if __name__ == "__main__":
         import uvicorn
-        uvicorn.run(hello_world_app, "127.0.0.1", 5000, debug=True)
+        uvicorn.run(hello_world_app, host="127.0.0.1", port=5000, debug=True)
 
 Run this python-file with:
 
@@ -117,7 +117,7 @@ Refactor your code this:
 
     if __name__ == "__main__":
         import uvicorn
-        uvicorn.run(hello_world_app, "127.0.0.1", 5000, debug=True)
+        uvicorn.run(hello_world_app, host="127.0.0.1", port=5000, debug=True)
 
 The `response.text` - function takes a `string` as input
 and returns a `dict`-similar to one we have constructed manually before.
@@ -189,7 +189,7 @@ Than insert the following code into `01-tutorial.py`
 
     if __name__ == "__main__":
         import uvicorn
-        uvicorn.run(hello_world_app, "127.0.0.1", 5000, debug=True)
+        uvicorn.run(hello_world_app, host="127.0.0.1", port=5000, debug=True)
 
 As you can see, the source-code has changed a bit. Our `handler` stays the
 same, the main-part too. But we have imported a `middleware` called
@@ -291,7 +291,7 @@ First create a new file, called `02-tutorial.py` and insert this:
 
     if __name__ == "__main__":
         import uvicorn
-        uvicorn.run(fruit_app, "127.0.0.1", 5000, debug=True)
+        uvicorn.run(fruit_app, host="127.0.0.1", port=5000, debug=True)
 
 For the sake of this tutorial our database will be modeled as `dict` called `fruit_store`.
 To satisfy our customer will have to implemented some different routes. Therefore we
@@ -423,7 +423,7 @@ we add a new route and handler-function:
 
     if __name__ == "__main__":
         import uvicorn
-        uvicorn.run(fruit_app, "127.0.0.1", 5000, debug=True)
+        uvicorn.run(fruit_app, host="127.0.0.1", port=5000, debug=True)
 
 
 There are 2 things to note here. First we added a new routing-table entry, the third one, with

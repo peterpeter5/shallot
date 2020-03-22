@@ -13,7 +13,7 @@ def running_sever_fixture(handler):
     def running_server():
         server = build_server(handler)
         ip_port = ("127.0.0.1", 8550)
-        process = Process(target=lambda: uvicorn.run(server, *ip_port, debug=True))
+        process = Process(target=lambda: uvicorn.run(server, host=ip_port[0], port=ip_port[1], debug=True))
         process.start()
         time.sleep(1)
         yield f"http://{ip_port[0]}:{ip_port[1]}/"
