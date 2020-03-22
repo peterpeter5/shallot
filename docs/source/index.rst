@@ -25,6 +25,7 @@ Usage-guide:
    Static-Files <staticfiles>
    Response content-type <content-type>
    Cookies <cookies>
+   Websockets <websockets>
 
 
 
