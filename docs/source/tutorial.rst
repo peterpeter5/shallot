@@ -28,7 +28,7 @@ Hello World
 
 Our first goal will be to start a server, with a simple `handler` that will greet us.
 
-To do that we create file called `00-tutorial.py` and write our first handler:
+To do that we create file called `tutorial_00.py` and write our first handler:
 
 .. code-block:: python
 
@@ -48,7 +48,7 @@ Run this python-file with:
 
 .. code-block:: bash
 
-    python 00-tutorial.py
+    python tutorial_00.py
 
 Now a webserver should start and when you point your browser to the address: "http://127.0.0.1:5000/", than
 you should see your greeting rendered.
@@ -155,7 +155,7 @@ is visualized in your tab.
 
 Our next task will be, to correctly handle the "favicon.ico" - request.
 
-First we create a new file called `01-tutorial.py`. Than we create a folder called `static`.
+First we create a new file called `tutorial_01.py`. Than we create a folder called `static`.
 Now search for a suitable icon on the web or simply use the one
 that is in shallot/tutorial/static.
 
@@ -165,7 +165,7 @@ that is in shallot/tutorial/static.
     `favicon.ico`
 
 
-Than insert the following code into `01-tutorial.py`
+Than insert the following code into `tutorial_01.py`
 
 .. code-block:: python
 
@@ -212,7 +212,7 @@ file and if present will transmit it to the client. Now run your new app with:
 
 .. code-block:: bash
 
-    python 01-tutorial.py
+    python tutorial_01.py
 
 Next reload your browser and look at the browser-tab. If everything worked
 fine, than you should see your icon there. In the dev-tools network-tab you should
@@ -261,7 +261,7 @@ a fruit-management-system.
 Our users will be able which-fruits we have and to obtain a detailed description and quantity
 for each fruit. Additionally the user will be able to set the quantity for each fruit individually.
 
-First create a new file, called `02-tutorial.py` and insert this:
+First create a new file, called `tutorial_02.py` and insert this:
 
 .. code-block:: python
 
@@ -311,7 +311,7 @@ Now start your new app via:
 
 .. code-block:: bash
 
-    python 02-tutorial.py
+    python tutorial_02.py
 
 and point your browser to "http://127.0.0.1:5000/fruits". If your browser is new
 enough, it should render it as JSON. 
@@ -381,13 +381,10 @@ we add a new route and handler-function:
 
 .. code-block:: python
 
-    from shallot import build_server
+    from shallot import build_server, standard_not_found
     from shallot.response import text, json
     from shallot.middlewares import apply_middleware, wrap_json, wrap_routes
 
-
-    async def not_found(request):
-        return text("Not Found", 404)
 
     fruit_store = {
         "oranges": {"descr": "an orange ball", "qty": 0, "name": "orange"}, 
@@ -419,7 +416,7 @@ we add a new route and handler-function:
         wrap_json,
         wrap_routes(routes)
     )
-    fruit_app = build_server(middlewares(not_found))
+    fruit_app = build_server(middlewares(standard_not_found))
 
     if __name__ == "__main__":
         import uvicorn
@@ -450,5 +447,200 @@ the changed `quantity` too.
 
 For more information about routing and JSON refer to the documentation:
 
-- :doc:`json`
-- :doc:`routing`
+    - :doc:`json`
+    - :doc:`routing`
+
+
+Websockets
++++++++++++
+
+Now something completly different. Or at least somewhat different. Up until now,
+we "just" build http-webservices, explored routing, static files and json. But the
+lifecycle of an operation was always one request from the client and one response
+from the server. This is similar to a function-call and this is way, http-request-handlers
+in `shallot` are modeled this way.
+
+Websockets behave differently. A websocket is a steady connection between the client
+and the server. The communcation can be in both directions and not just
+in a simple request-response - way. Therfore a function is not enough to model such a 
+process. In python long-running (potentially endless) processes can be model with
+generators. A simple generator is this `count_up` example:
+
+.. code-block:: python
+
+    def count_up(limit=100):
+        count = 0
+        while True:
+            yield count
+            count += 1
+            if count >= limit:
+                break
+
+
+When you call the function / generator `count_up` nothing emediatly happens. But
+now you can iterate over the generator (and that possibly endless)
+
+
+.. code:: python
+    counter = count_up()
+    for value in counter:
+        print("Current CounterValue is: ", value)
+
+
+The code above will print the the numbers from 0 to 100. When you call `count_up` with
+`limit=-1`, then it would be an endless loop and python would try to print you **all** 
+the numbers.   
+
+In our non-counting-shallot-web-world the client is 
+an `async-generator <https://www.python.org/dev/peps/pep-0525/>`_. Therefore our handler
+function need to look a little bit different.
+
+
+.. code-block:: python
+
+    @websocket
+    async def print_client_messages(request, receiver):
+        async for message in receiver:
+            print(message)
+
+
+First: we need a decorator `@websocket` to use declare a function a `shallot` 
+websocket handler. Second: this function must accept a second parameter (`receiver`).
+`receiver` is an async-generator and therefore we need to loop with `async for`. 
+Everytime the client sends a message, the body of the `async for` - loop will be 
+executed. And in our example, the clients messages will be printed.
+
+In fact, not only our clients will be represented as `async-generators`, the handler-
+functions them selfs are `async-generators` too. The next example shows a simple echo-server,
+including routing.
+
+
+.. code:: python
+
+    from shallot import build_server, websocket, standard_not_found
+    from shallot.middlewares import wrap_routes, apply_middleware
+    from shallot.response import ws_send
+
+
+    @websocket
+    async def echo_server(request, receiver):
+        async for message in receiver:
+            yield ws_send(f"@echo: {message}")
+
+
+    @websocket
+    async def named_echo_server(request, receiver, name):
+        async for message in receiver:
+            yield ws_send(f"@{name}: {message}")
+
+
+    routes = [
+        ("/echo", ["WS"], echo_server),
+        ("/named/{name}", ["WS"], named_echo_server)
+
+    ]
+
+    app = build_server(
+        apply_middleware(
+            wrap_routes(routes)
+        )(standard_not_found)
+    )
+
+    if __name__ == "__main__":
+        import uvicorn
+        uvicorn.run(app)
+
+
+The code above shows a fully working websocket-echo-server. There are a few things to
+look out for:
+
+    1. routing: for websockets you declare a route like normal, but you use `"WS"` as "http-method".
+    2. retrun-type: the return-value of your handler-function is a dict, declaring the message-type (bytes or string). Use `ws_send` to automatically infer the type for you.
+    3. handler is an async-generator: with the handler using `yield` to communicate back to the client, our handler-function becomes an async-generator.
+    4. the code for the examples above can be found in "shallot/tutorial/tutorial_03.py"
+
+
+Communcation - patterns
+************************
+
+
+
+Now that we have a basic understanding of what websockets in shallot look like, let's
+talk about some usecase of how websockts can be used in different situation.
+
+1. Fan-In:
+This is a situation where your client(s) are just reporting data to your server and 
+you do something with it. (For example: logging, making statistics, and so on)
+
+.. code:: python
+
+    @websocket
+    async def fan_in(request, receiver):
+        async for message in receiver:
+            # do something usefull. For example print the data
+            print(message)
+
+Here we are just waiting on incomming data from the client and print them. We do not 
+communicate back to the client, because we don't need to.
+
+
+2. Fan-out:
+
+In this scenario we (the server) have data, that we want to push to the client. An example
+for this could be, a frontend that communicates via websocket with our server and regulary
+need updates about the current time.
+
+.. code:: python
+    import time
+    import asyncio
+
+    @websocket
+    async def fan_out(request, receiver):
+        while True:
+            yield(ws_send(f"current-time-stamp {time.time()}"))
+            await asyncio.sleep(1)
+
+In this situatio we do not care about, in fact we do not expect to get, client messages.
+Thus we do not use the receiver to wait on them. The `fan_out` function yields the current 
+time and then goes to sleep for 1 second. Because we wrote `while True` this will happen
+until the client disconnects or the internet ends. 
+
+.. warning:: 
+    Do not use this code in production! Your servers websocket - queue will get overloaded if your client sends data! 
+    The server will close the connection or fail on overload.
+
+
+3. One - to - One - Client - Server:
+This is basically the echo-server situation. Here is an example of a rather charming, but not
+very skillfull chatbot.
+
+.. code:: python
+
+    @websocket
+    async def one_to_one(request, receiver):
+        async for message in receiver:
+            if message == "hello":
+                yield ws_send("hello beautiful")
+            elif message == "exit":
+                yield ws_send("byebye")
+                break
+            elif message == "i like you":
+                yield ws_send("That is very nice! I like you too!")
+            else:
+                yield ws_send("pardon me. I do not have a reply to this")
+
+
+This chatbot reacts to client messages. When it receives a message from the client, it
+tries to find a good response and yield back the answer. 
+
+.. note:: 
+    The code for the examples 1-3 can be found in `shallot/tutorial/tutorial_04.py`
+
+4. Many to many. Aka the Chatroom. Aka the websocket-pool.
+In this scenario, you have many clients and you either want them to communicate with
+each other or you want to send some of them (or all) messages.  
+
+This is not an easy task and maybe, there will be a middleware in the future that can hello_world_app
+you with this. But for now, there is a working chatroom - example in `shallot/tutorial/tutorial_05.py`.
+It is not intended to be a refernce - implementation, but to give you a hint on how you might 
+want to implement this.

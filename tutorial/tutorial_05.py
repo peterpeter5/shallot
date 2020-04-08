@@ -54,6 +54,7 @@ async def merge(*streams):
     async def _put_on_q(queue, stream):
         async for m in stream:
             await queue.put(m)
+            
     q = asyncio.Queue()
     tasks = list(map(lambda s: _put_on_q(q, s), streams))
     for t in tasks:

@@ -6,6 +6,7 @@ from shallot.response import json
 from shallot.middlewares import wrap_parameters, apply_middleware
 import requests
 from itertools import zip_longest
+from shallot import build_server
 
 
 def grouper(iterable, n, fillvalue=None):
@@ -25,7 +26,7 @@ async def handle_any_request(request):
 
 
 handler = apply_middleware(wrap_parameters(keep_blank_values=True))(handle_any_request)
-running_server = running_sever_fixture(handler)
+running_server = running_sever_fixture(build_server(handler))
 
 
 @given(st.text())

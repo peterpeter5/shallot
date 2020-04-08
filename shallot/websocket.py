@@ -3,6 +3,7 @@ from functools import partial
 from .response import ws_close
 import sys
 import contextlib
+from collections.abc import AsyncGenerator
 
 
 class WSDisconnect(Exception):
@@ -18,8 +19,6 @@ def _in_maybe_unittest():
             return
         else:
             raise
-    except Exception:
-        raise
 
 
 async def _build_receiver(receive):
@@ -57,11 +56,21 @@ async def _default_on_close(scope):
     pass
 
 
+async def _ensure_generator(afunc):
+    result = await afunc
+    if result:
+        yield result
+    else:
+        yield {"type": "websocket.close", "code": 1000}
+
+
 async def _ws_async_generator_client(func, scope, extras, receive, send):
-    closed = False
 
     receiver = _build_receiver(receive)
     client = func(scope, receiver, *extras)
+    if not isinstance(client, AsyncGenerator):
+        client = _ensure_generator(client)
+
     closed = False
     async for client_message in client:
         if client_message["type"] == "websocket.close":

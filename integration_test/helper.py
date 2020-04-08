@@ -8,17 +8,22 @@ import string
 from hypothesis import strategies as st
 
 
-def running_sever_fixture(handler):
+def running_sever_fixture(server_app):
     @pytest.fixture
     def running_server():
-        server = build_server(handler)
+        server = server_app
         ip_port = ("127.0.0.1", 8550)
         process = Process(target=lambda: uvicorn.run(server, host=ip_port[0], port=ip_port[1], debug=True))
         process.start()
         time.sleep(1)
         yield f"http://{ip_port[0]}:{ip_port[1]}/"
         process.terminate()
-        time.sleep(1)
+        if process.is_alive():
+            try:
+                os.kill(process.pid)
+            except:
+                pass
+        time.sleep(0.1)
     return running_server
 
 

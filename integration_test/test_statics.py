@@ -2,7 +2,7 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 import pytest
 import os
-from shallot.ring import build_server
+from shallot import build_server
 from shallot.middlewares import apply_middleware
 from shallot.middlewares.staticfiles import wrap_static
 from multiprocessing import Process
@@ -29,7 +29,7 @@ async def noop_handler(request):
 
 
 handler = apply_middleware(wrap_static(__test_data__, __here__))(noop_handler)
-running_server = running_sever_fixture(handler)
+running_server = running_sever_fixture(build_server(handler))
 
 
 @given(st.text())

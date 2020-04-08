@@ -160,6 +160,44 @@ async def test_gen_strategy_will_send_every_message_that_gets_yielded():
         )
     sender.assert_has_calls(list(map(call, fake_messages)))
 
+
+@pytest.mark.asyncio
+async def test_ws_handler_can_be_non_generators():
+    async def ws_just_return_first_message(scope, receiver):
+        async for msg in receiver:
+            return ws_receive(msg)
+
+    async def ws_return_nothing(scope, receiver):
+        pass
+
+
+    sender = Mock().send
+    async_sender = _mock_awaitable(sender)
+    fake_messages = list(map(ws_receive, ["a", b"", "1", b"2"]))
+    receiver = receive_func_from_coll(fake_messages)
+    await _ws_async_generator_client(
+        ws_just_return_first_message,
+        {},
+        tuple(),
+        receiver,
+        async_sender
+    )
+    
+    assert sender.mock_calls == [call(fake_messages[0]), call(ws_close())]
+
+    sender.reset_mock()
+    await _ws_async_generator_client(
+        ws_return_nothing,
+        {},
+        tuple(),
+        receiver,
+        async_sender
+    )
+
+    assert sender.mock_calls == [call(ws_close())]
+
+
+
 @pytest.mark.asyncio
 async def test_close_gets_automatically_sended_when_client_stops_yielding_messages():
     async def ws_close_immediately(scope, receiver):

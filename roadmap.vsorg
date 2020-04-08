@@ -1,0 +1,8 @@
+#+TITLE: Roadmap for shallot and bugs / todos 
+#+TAGS: sahllot
+-------------------------
+
+⊙ Improvements 
+ ⊘ Urgent 
+  ⊖ TODO Add validation / erromesages to routing middleware
+  ⊖ TODO routes without leading slash should be illegal and an error

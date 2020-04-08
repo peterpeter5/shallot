@@ -1,4 +1,5 @@
 # shallot - a plugable "webframework"
+[![Documentation Status](https://readthedocs.org/projects/shallot/badge/?version=latest)](https://shallot.readthedocs.io/en/latest/?badge=latest)
 
 ## What is a shallot?
 
