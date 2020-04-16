@@ -26,6 +26,7 @@ Usage-guide:
    Response content-type <content-type>
    Cookies <cookies>
    Websockets <websockets>
+   Startup / Teardown / Initialize <lifecycle_mgmt>
 
 
 

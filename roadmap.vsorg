@@ -4,5 +4,19 @@
 
 ⊙ Improvements 
  ⊘ Urgent 
-  ⊖ TODO Add validation / erromesages to routing middleware
+  ⊖ TODO Add validation / errormesages from routing middleware
   ⊖ TODO routes without leading slash should be illegal and an error
+  ⊖ TODO scope in websockets should be changeable in on_connect and on_disconnect
+  ⊖ TODO Integration of start-up / tear-down [USER-FUNCTIONS]
+ ⊘ mid-near future
+  ⊖ TODO CORS middleware
+  ⊖ TODO Session middleware  
+ ⊘ Longrunner:
+  ⊖ Websocket-Pool-Middleware:
+   ⊙ Pool aka. chatroom (?) management. 
+   ⊙ Client - management
+   ⊙ Buffering - aka. Backpressure strategy
+  ⊖ Gracefulll - Shutdown:
+   ⊙ Cancel all new requests after receiving shutdown signal  
+   ⊙ try to complete remaining requests in timeout
+   ⊙ 

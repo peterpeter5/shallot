@@ -318,7 +318,7 @@ enough, it should render it as JSON.
 
 .. note:: 
     From now on, you should use a proper tool to debug your rest-api. You can 
-    use python with the excellent `requests-package <http://docs.python-requests.org/en/master/>`_ or any 
+    use python with the excellent `requests-package <https://requests.readthedocs.io/en/master/>`_ or any 
     graphical rest-client you like.
 
 As the next step we implement our details-view: 
@@ -482,6 +482,7 @@ now you can iterate over the generator (and that possibly endless)
 
 
 .. code:: python
+
     counter = count_up()
     for value in counter:
         print("Current CounterValue is: ", value)
@@ -561,8 +562,7 @@ look out for:
 
 
 Communcation - patterns
-************************
-
+------------------------
 
 
 Now that we have a basic understanding of what websockets in shallot look like, let's
@@ -591,6 +591,7 @@ for this could be, a frontend that communicates via websocket with our server an
 need updates about the current time.
 
 .. code:: python
+
     import time
     import asyncio
 

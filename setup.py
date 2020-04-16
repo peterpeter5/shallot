@@ -9,7 +9,7 @@ with open(os.path.join(__here__, "README.md"), "r") as fh:
 
 
 full_requires = ["uvicorn"]
-test_requires = ["pytest", "hypothesis", "requests", "pytest-asyncio"]
+test_requires = ["pytest", "hypothesis", "requests", "pytest-asyncio", "pytest-cov"]
 
 
 setuptools.setup(

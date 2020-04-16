@@ -223,3 +223,5 @@ def setup(app):
             'auto_toc_tree_section': 'Contents',
             }, True)
     app.add_transform(AutoStructify)
+
+linkcheck_ignore = [r'http://localhost:\d+/', r'http://127.0.0.1:\d+/']

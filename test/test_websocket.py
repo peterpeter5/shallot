@@ -3,6 +3,7 @@ from shallot import build_server, websocket
 from shallot.websocket import _build_receiver, WSDisconnect, _ws_async_generator_client
 from shallot.response import ws_send, ws_close
 from unittest.mock import Mock, call
+from test import awaitable_mock
 
 
 @pytest.fixture
@@ -32,10 +33,6 @@ async def raw_asgi_handler(receive, send):
 async def raw_asgi_wrapper(scope):
     return raw_asgi_handler
 
-def _mock_awaitable(func):
-    async def awaitable(*args, **kwargs):
-        return func(*args, **kwargs)
-    return awaitable
 
 
 def ws_receive(data):
@@ -46,7 +43,7 @@ def ws_receive(data):
 def receive_func_from_coll(coll):
     mock = Mock()
     mock.side_effect = list(coll) + [StopAsyncIteration]
-    return _mock_awaitable(mock)
+    return awaitable_mock(mock)
 
 
 @pytest.mark.asyncio
@@ -148,7 +145,7 @@ async def test_gen_strategy_will_send_every_message_that_gets_yielded():
             yield ws_receive(msg)
 
     sender = Mock().send
-    async_sender = _mock_awaitable(sender)
+    async_sender = awaitable_mock(sender)
     fake_messages = list(map(ws_receive, ["a", b"", "1", b"2"]))
     receiver = receive_func_from_coll(fake_messages)
     await _ws_async_generator_client(
@@ -172,7 +169,7 @@ async def test_ws_handler_can_be_non_generators():
 
 
     sender = Mock().send
-    async_sender = _mock_awaitable(sender)
+    async_sender = awaitable_mock(sender)
     fake_messages = list(map(ws_receive, ["a", b"", "1", b"2"]))
     receiver = receive_func_from_coll(fake_messages)
     await _ws_async_generator_client(
@@ -204,7 +201,7 @@ async def test_close_gets_automatically_sended_when_client_stops_yielding_messag
         yield ws_send("adf")
 
     sender = Mock().send
-    async_sender = _mock_awaitable(sender)
+    async_sender = awaitable_mock(sender)
     fake_messages = list(map(ws_receive, ["a"]))
     receiver = receive_func_from_coll(fake_messages)
     await _ws_async_generator_client(
@@ -223,7 +220,7 @@ async def test_close_will_only_get_once_when_client_yields_a_close():
         yield ws_close(2000)
 
     sender = Mock().send
-    async_sender = _mock_awaitable(sender)
+    async_sender = awaitable_mock(sender)
     fake_messages = list(map(ws_receive, ["a"]))
     receiver = receive_func_from_coll(fake_messages)
     await _ws_async_generator_client(
@@ -270,7 +267,7 @@ async def raise_ws_disconnect_simulate_client_disconnect(scope, receive):
 async def run_ws_handler_with_messages(handler, messages, scope_type="websocket"):
     scope = {"type": scope_type}
     sender = Mock().send
-    async_sender = _mock_awaitable(sender)
+    async_sender = awaitable_mock(sender)
     receiver = receive_func_from_coll(messages)
     initialized_handler = await handler(scope)
     await initialized_handler(receiver, async_sender)
@@ -349,7 +346,7 @@ async def test_ws_handler_can_have_custom_on_disconnect():
     disconnect = Mock()
 
     _ = await run_ws_handler_with_messages(
-        websocket(disconnect_immediatly, on_disconnect=_mock_awaitable(disconnect)),
+        websocket(disconnect_immediatly, on_disconnect=awaitable_mock(disconnect)),
         [{"type": "websocket.connect"}],
         scope_type="websocket"
     )
@@ -361,7 +358,7 @@ async def test_ws_handler_can_have_custom_on_close():
     close = Mock()
 
     _ = await run_ws_handler_with_messages(
-        websocket(close_immediatly, on_close=_mock_awaitable(close)),
+        websocket(close_immediatly, on_close=awaitable_mock(close)),
         [{"type": "websocket.connect"}],
         scope_type="websocket"
     )

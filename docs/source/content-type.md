@@ -9,7 +9,7 @@ server = build_server(apply_middleware(
     wrap_content_type())(handler)
 )
 ```
-By default it will guess the content-type based on the python-builtin `mimetypes` with non-strict evaluation. To change this behavior one can provide a `strict=True` flag to `wrap_content`.
+By default, it will guess the content-type based on the python-builtin `mimetypes` with non-strict evaluation. To change this behavior one can provide a `strict=True` flag to `wrap_content`.
 
 
 When the content-type can not be guessed, "application/octet-stream" is used. This can be overridden via `wrap_content_type`.

@@ -27,8 +27,12 @@ integrationtest-package: build testvenv
 	pip install $(DIST)[test]; \
 	pytest ./integration_test ./test
 
+
 integration_test-github:
 	pytest --cov=shallot --cov-report html --cov-report term ./integration_test ./test
+
+	$(MAKE) -C docs coverage
+	$(MAKE) -C docs linkcheck
 
 format-check:
 	black --line-length=120 shallot/
