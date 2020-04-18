@@ -64,7 +64,7 @@ async def test_tutorial_fan_out(ws_simple):
         assert "time" in second_message.lower()
         end = time.time()
         
-    assert 1 < (end - start) < 2, "The timing between the messages was not correct"
+    assert 0.8 < (end - start) < 1.2, "The timing between the messages was not correct"
 
 
 @pytest.mark.asyncio
