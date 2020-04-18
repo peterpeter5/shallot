@@ -1,5 +1,7 @@
 # shallot - a plugable "webframework"
 [![Documentation Status](https://readthedocs.org/projects/shallot/badge/?version=latest)](https://shallot.readthedocs.io/en/latest/?badge=latest)
+![](https://github.com/peterpeter5/shallot/workflows/Python%20package/badge.svg)
+[![PyPI version](https://badge.fury.io/py/shallot.svg)](https://pypi.org/project/shallot/)
 
 ## What is a shallot?
 
@@ -75,7 +77,7 @@ The `response` is the result of the function-call to the handler (with the `requ
 - `status`: the http-return-code [`int`]
 - `body` [optional]: the body of the http-response [`bytes`]
 - `headers` [optional]: the http-response-headers to be used. The value is a `dict` (for example: `{"header1-name": "header1-value", ...}`)
-- `stream` [optional]: this must be an `async-iterable` yielding `bytes`. When the `response` contains a key named `stream`, than `shallot` will consume the `iterable` and will stream the provided data to the client. This is specially usefull for large response-bodies.
+- `stream` [optional]: this must be an `async-iterable` yielding `bytes`. When the `response` contains a key named `stream`, than `shallot` will consume the `iterable` and will stream the provided data to the client. This is specially useful for large response-bodies.
 
 ### handler
 
@@ -88,7 +90,7 @@ async def handler(request):
 
 ### middleware
 
-Most of `shallot`s  functionality is implemented via middlewares. That makes it possible to easily extend, configure or change `shallot`s behaviour. In fact: if you don't like the implementation of a certain middleware, just write your own and use it insetad (or better: enhance `shallot` via PR)!
+Most of `shallot`s  functionality is implemented via middlewares. That makes it possible to easily extend, configure or change `shallot`s behaviour. In fact: if you don't like the implementation of a certain middleware, just write your own and use it instead (or better: enhance `shallot` via PR)!
 
 The general functionality of a middleware is, that it wraps a handler-function-call. Middlewares are designed that way, that they can be composed / chained together. So for a middleware-chain with 3 different middlewares, a call chain might look like:
 
@@ -120,7 +122,7 @@ server = build_server(minimal)
 
 if __name__ == "__main__":
     import uvicorn  # shallot is not tied to uvicorn, its just fast
-    uvicorn.run(server, host="127.0.0.1", port=5000, log_level="info", debug=True)
+    uvicorn.run(server)
 ```
 
 
@@ -137,7 +139,7 @@ middleware_pile = apply_middleware(
     wrap_json,
 )
 
-server = build_server(middlewre_pile(standard_not_found))
+server = build_server(middleware_pile(standard_not_found))
 ```
 ## Features
 
@@ -146,7 +148,7 @@ Nothing is enabled by default. Every functionality has its own middleware.
 ### Routing
 To include `shallot`s builtin routing functionality, use the routing-middleware: `wrap_routes`.
 
-routing is one essential and by far, the most opinonated part of any webframeworks-api. `shallot` is there no exception. Routing is defined completely via a data-structure:
+routing is one essential and by far, the most opinonated part of any webframeworks-api. `shallot` is no exception there. Routing is defined completely via a data-structure:
 
 ```python
 async def hello_world(request):
@@ -208,6 +210,20 @@ wrap_static("/static/data", root_path=here)  # will always assume the folder is 
 Browser-caches will be honored. For that, `last-modified` and `etag` - headers will be sent accordingly. 
 Requests with a path containing "../" will be automatically responded with `404-Not Found`.
 
+### Websockets
+
+In shallot, websockets are modeled as async-generators. Except that, websockets-handlers are more or less equal to http-handlers.
+They receive data, `str` or `bytes` from the generator (`receiver`) and a `dict` from the opening http-request (`request`). As a
+result a websocket-handler yields back data (`dict`), in the example below, constructed via `ws_send`
+
+
+```python
+@websocket
+async def echo_server(request, receiver):
+    async for message in receiver:
+        yield ws_send(f"@echo: {message}")
+
+```
 
 
 

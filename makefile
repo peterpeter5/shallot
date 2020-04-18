@@ -14,14 +14,6 @@ install: testvenv
 	source .testvenv/bin/activate; \
 	pip install ./dist/shallot*.whl;
 
-install-pytest:
-	source .testvenv/bin/activate; \
-	pip install pytest pytest-asyncio;
-
-unittest-package: install-pytest testvenv
-	source .testvenv/bin/activate; \
-	pytest ./test;
-
 integrationtest-package: build testvenv
 	source .testvenv/bin/activate; \
 	pip install $(DIST)[test]; \
