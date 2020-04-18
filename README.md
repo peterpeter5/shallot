@@ -131,10 +131,10 @@ to configure/run a real application, one would typically chain/apply a pile of m
 ```python
 
 middleware_pile = apply_middleware(
-    wrap_cors(),
     wrap_content_type(),
     wrap_static("/static/data"),
     wrap_routes(routes),
+    wrap_parameters(),
     wrap_cookies,
     wrap_json,
 )
@@ -148,7 +148,7 @@ Nothing is enabled by default. Every functionality has its own middleware.
 ### Routing
 To include `shallot`s builtin routing functionality, use the routing-middleware: `wrap_routes`.
 
-routing is one essential and by far, the most opinonated part of any webframeworks-api. `shallot` is no exception there. Routing is defined completely via a data-structure:
+routing is one essential and by far, the most opinionated part of any webframeworks-api. `shallot` is no exception there. Routing is defined completely via a data-structure:
 
 ```python
 async def hello_world(request):
@@ -174,7 +174,7 @@ as shown above, `routes` is a list of tuples with:
     2. the allowed methods
     3. the handler
 
-routes with an `{tag}` in it, are considered dynamic-routes. The router will parse the value from the url and transfered it (as string) to the handler-function. Therfore the handler function must accept the `request` and as many arguments as there are `{tag}`s.
+Routes with an `{tag}` in it, are considered dynamic-routes. The router will parse the value from the url and transfered it (as string) to the handler-function. Therfore the handler function must accept the `request` and as many arguments as there are `{tag}`s.
 
 ### JSON
 to easily work with json-data, use the json-middleware `wrap_json`:
