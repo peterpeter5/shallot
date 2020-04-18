@@ -88,10 +88,9 @@ async def test_lifespan_default_callbacks_start_are_used_when_nothing_is_provide
     
     server = build_server(handler_identity, on_start=awaitable_mock(mocked_on_start))
     lifecycle_handler = server({"type": "lifespan"})
-    from concurrent.futures import TimeoutError as FuturesTimeoutError
-    from asyncio.futures import TimeoutError as AsyncTimeoutError
+    from asyncio import TimeoutError as AsyncTimeoutError
 
-    with pytest.raises((FuturesTimeoutError, AsyncTimeoutError)):
+    with pytest.raises(AsyncTimeoutError):
         await asyncio.wait_for(asyncio.ensure_future(lifecycle_handler(receive_start_up, send_mocked)), timeout=0.3)
 
     mocked_on_start.assert_called_once()
