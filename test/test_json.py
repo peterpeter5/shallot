@@ -5,7 +5,12 @@ from shallot.middlewares.json import wrap_json
 
 @pytest.fixture
 def json_middleware():
-    return apply_middleware(wrap_json)
+    return apply_middleware(wrap_json())
+
+
+@pytest.fixture
+def strict_json_middleware():
+    return apply_middleware(wrap_json(fail_on_missing_body=True))
 
 
 @pytest.mark.asyncio
@@ -47,3 +52,30 @@ async def test_a_malformed_json_results_in_400_reponse(json_middleware):
     }
     response = await json_middleware(noop)(request)
     assert 400 == response["status"]
+
+
+@pytest.mark.asyncio
+async def test_a_missing_body_results_in_400_reponse_if_strict(strict_json_middleware):
+    async def noop(request):
+        return request
+
+    request = {
+        "headers": {"content-type": "application/json"},
+        "body": b''
+    }
+    response = await strict_json_middleware(noop)(request)
+    assert 400 == response["status"]
+
+
+@pytest.mark.asyncio
+async def test_a_missing_body_results_in_None_if_NOT_strict(json_middleware):
+    async def noop(request):
+        return request
+
+    request = {
+        "headers": {"content-type": "text/plain"},
+        "body": b''
+    }
+    response = await json_middleware(noop)(request)
+    assert "json" in response
+    assert response["json"] == None

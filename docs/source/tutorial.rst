@@ -280,11 +280,13 @@ First create a new file, called `tutorial_02.py` and insert this:
         return json({"fruits": list(fruit_store.keys())})
 
 
-    routes = [("/fruits", ["GET"], fruit_collection)]
+    routes = [
+        ("/fruits", ["GET"], fruit_collection),
+    ]
 
 
     middlewares = apply_middleware(
-        wrap_json,
+        wrap_json(),
         wrap_routes(routes)
     )
     fruit_app = build_server(middlewares(not_found))
@@ -413,7 +415,7 @@ we add a new route and handler-function:
 
 
     middlewares = apply_middleware(
-        wrap_json,
+        wrap_json(),
         wrap_routes(routes)
     )
     fruit_app = build_server(middlewares(standard_not_found))

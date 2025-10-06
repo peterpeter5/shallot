@@ -3,7 +3,7 @@
 Cookies are handled as dict's. To use cookie-handling one must include `wrap_cookies` in the middleware-chain.
 
 ```python
-build_server(apply_middleware(wrap_cookies)(handler))
+build_server(apply_middleware(wrap_cookies())(handler))
 ```
 ## Examples
 

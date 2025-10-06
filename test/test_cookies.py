@@ -24,7 +24,7 @@ def cookie_handler():
             "request_cookies": request.get("cookies"),
             "cookies": {"a": {"value": "tasty_tomato"}, "b": {"value": 12, "secure": True}}
         }
-    return apply_middleware(wrap_cookies)(noop)
+    return apply_middleware(wrap_cookies())(noop)
 
 
 def test_header_serializer_with_headers_and_cookies():
@@ -78,7 +78,7 @@ async def test_cookie_response_dict_becomes_cookie_serializer(cookie_handler):
 
 async def return_cookie_values_from_handler(handler, request=None):
     request = {} if request is None else request
-    http_handler = apply_middleware(wrap_cookies)(handler)
+    http_handler = apply_middleware(wrap_cookies())(handler)
     response = await http_handler(request)
     values = list(map(lambda x: x[1], response["cookies"].items()))
     return values

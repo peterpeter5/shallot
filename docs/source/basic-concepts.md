@@ -130,6 +130,8 @@ While the function-signature of a `shallot`-handler is the same as with [ring](h
 the minimal deployable thing one can build is this:
 
 ```python
+from shallot import build_server
+
 async def minimal(request):
     """
     answer EVERY request with 200 and NO body 
@@ -155,8 +157,8 @@ middleware_pile = apply_middleware(
     wrap_content_type(),
     wrap_static("/static/data"),
     wrap_routes(routes),
-    wrap_cookies,
-    wrap_json,
+    wrap_cookies(),
+    wrap_json(),
 )
 
 server = build_server(middlewre_pile(handle_404))
