@@ -104,7 +104,11 @@ async def _responde_client_direct(send, response):
     headers = serialize_headers(response)
     await send({"type": "http.response.start", "status": status, "headers": headers})
     await send(
-        {"type": "http.response.body", "body": response.get("body", b""), "more_body": False,}
+        {
+            "type": "http.response.body",
+            "body": response.get("body", b""),
+            "more_body": False,
+        }
     )
 
 

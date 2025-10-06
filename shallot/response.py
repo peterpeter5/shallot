@@ -35,7 +35,10 @@ def text(body="", status=200, encoding="utf-8"):
     return {
         "status": status,
         "body": transfered_body,
-        "headers": {"content-type": f"text/plain; charset={encoding}", "content-length": f"{len(transfered_body)}",},
+        "headers": {
+            "content-type": f"text/plain; charset={encoding}",
+            "content-length": f"{len(transfered_body)}",
+        },
     }
 
 
@@ -44,7 +47,10 @@ def json(data, status=200):
     return {
         "status": 200,
         "body": transfer_body,
-        "headers": {"content-type": "application/json; charset=utf-8", "content-length": f"{len(transfer_body)}",},
+        "headers": {
+            "content-type": "application/json; charset=utf-8",
+            "content-length": f"{len(transfer_body)}",
+        },
     }
 
 

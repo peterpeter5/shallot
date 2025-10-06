@@ -8,7 +8,10 @@ def wrap_parameters(keep_blank_values=False, strict_parsing=False, encoding="utf
             if qs:
                 qs = qs.decode(encoding) if isinstance(qs, bytes) else qs
                 query_params = parse_qs(
-                    qs, keep_blank_values=keep_blank_values, strict_parsing=strict_parsing, encoding=encoding,
+                    qs,
+                    keep_blank_values=keep_blank_values,
+                    strict_parsing=strict_parsing,
+                    encoding=encoding,
                 )
             else:
                 query_params = {}

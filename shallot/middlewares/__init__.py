@@ -37,7 +37,7 @@ def _compose(*functions):
 
 def apply_middleware(*middlewares):
     """
-    :param middlewares: middleware-functions to wrap-up 
+    :param middlewares: middleware-functions to wrap-up
     :return: wrapper-function to use with handler -> server
     """
 

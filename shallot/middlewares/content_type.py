@@ -2,7 +2,9 @@ from mimetypes import guess_type, add_type
 
 
 def wrap_content_type(
-    additional_content_types=None, default_content_type="application/octet-stream", strict=False,
+    additional_content_types=None,
+    default_content_type="application/octet-stream",
+    strict=False,
 ):
 
     additional_content_types = {} if additional_content_types is None else additional_content_types
