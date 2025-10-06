@@ -11,3 +11,4 @@ recommonmark
 pytest-cov
 black
 flake8-bugbear
+websockets

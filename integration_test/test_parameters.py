@@ -1,7 +1,7 @@
 import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
-from .helper import st_query_list, running_sever_fixture
+from integration_test.helper import st_query_list, running_sever_fixture
 from shallot.response import json
 from shallot.middlewares import wrap_parameters, apply_middleware
 import requests
