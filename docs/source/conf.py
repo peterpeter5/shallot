@@ -59,27 +59,11 @@ templates_path = ['_templates']
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
-#
-# source_suffix = ['.rst', '.md']
-# source_parsers = {
-    #'.rst': 'restructuredtext',
-    # '.md': 'markdown',
-#} 
-import os
-if not os.environ.get("_LOCAL_DOCS_BUILD_"):  # RTD-Build
-    from recommonmark.parser import CommonMarkParser
-    from recommonmark.transform import AutoStructify
- 
-    source_suffix = {
-        '.rst': 'restructuredtext',
-        '.md': CommonMarkParser,
-    }
-    source_suffix = ['.rst', '.md']
-else:
-    source_suffix = {
-        '.rst': 'restructuredtext',
-        '.md': 'markdown',
-    }
+
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.md': 'markdown',
+}
 # The master toctree document.
 master_doc = 'index'
 
