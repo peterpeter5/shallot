@@ -9,12 +9,12 @@ with open(os.path.join(__here__, "README.md"), "r") as fh:
 
 
 full_requires = ["uvicorn"]
-test_requires = ["pytest", "hypothesis", "requests", "pytest-asyncio", "pytest-cov"]
+test_requires = ["pytest", "hypothesis", "requests", "pytest-asyncio", "pytest-cov", "websockets"]
 
 
 setuptools.setup(
     name="shallot",
-    version="0.2.0",
+    version="1.0.0",
     author="Peter Peter",
     author_email="dev.peterpeter5@gmail.com",
     description="Fast, small ASGI-compliant webframework",
