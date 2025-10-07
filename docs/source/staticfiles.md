@@ -19,7 +19,7 @@ wrap_static("/static/data", root_path=here)  # will always assume the folder is 
 ```
 
 Browser-caches will be honored. For that, `last-modified` and `etag` - headers will be sent accordingly. When the browser requests a already-cached resource (`if-none-match` or/and `if-modified-since` in request headers), this middleware will reply with a `304-Not Modified`.
-For further information about browser-file-caches: [MDN:Cache validation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching#Cache_validation)
+For further information about browser-file-caches: [MDN:Cache validation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching#validation)
 
 ``` note:: Requests with a path containing "../" will be automatically responded with *404-Not Found*.
 ```

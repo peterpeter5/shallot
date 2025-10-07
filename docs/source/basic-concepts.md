@@ -5,7 +5,7 @@
 
 `shallot` models a http-request-response-cycle as single function call. It treats `request` and `response` as `dict`s. The request get passed to a `handler`-function (which itself can be "middleware-decorated") and the `handler` produces a response.
 Basically `shallot` works like this:
-1. take the ASGI [connection-scope](https://asgi.readthedocs.io/en/latest/specs/www.html#connection-scope) (`dict`)
+1. take the ASGI [connection-scope](https://asgi.readthedocs.io/en/latest/specs/www.html#http-connection-scope) (`dict`)
 2. read the body of the request and attach the body (`bytes`) to scope-dict 
 3. pass the request-`dict` (scope + attached body) to a user-defined function (called `handler`)
 4. the result (`response`) of a handler has to be a `dict`. The response must at least provide a `status`-key with an integer. If provided a `body`-key for the response is provided, than the value must be of type `bytes` and to will be transferred to the client. 
@@ -39,7 +39,7 @@ Basically `shallot` works like this:
 
 ## request
 
-The `request` is always the first argument that gets passed to your `handler`-function. It is of type `dict`. It has basically the same content than the [ASGI-connection-scope](https://asgi.readthedocs.io/en/latest/specs/www.html#connection-scope). 
+The `request` is always the first argument that gets passed to your `handler`-function. It is of type `dict`. It has basically the same content than the [ASGI-connection-scope](https://asgi.readthedocs.io/en/latest/specs/www.html#http-connection-scope). 
 
 A request will at least have the following structure:
 
@@ -148,6 +148,10 @@ if __name__ == "__main__":
 to configure/run a real application, one would typically chain/apply a pile of middlewares and a handler:
 
 ```python
+from shallot import build_server
+from shallot.middlewares import wrap_parameters, wrap_cookies, wrap_json, apply_middleware, wrap_routes
+
+
 
 async def handle_404(request):
     return {"status": 404}

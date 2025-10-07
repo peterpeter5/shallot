@@ -43,7 +43,7 @@ Cookies are send to the client, when the response contains a `cookies`-key. The 
 {"cookie-name": {"value": 0}}
 ```
 
-This will result in a *session-cookie* : `{"cookie-name": 0}`, which will be sent with the next request. Further data can be attached to the cookie. The supported keys are, all names that are supported by [python-std-lib:morsel]("https://docs.python.org/3/library/http.cookies.html#http.cookies.Morsel"):
+This will result in a *session-cookie* : `{"cookie-name": 0}`, which will be sent with the next request. Further data can be attached to the cookie. The supported keys are, all names that are supported by [python-std-lib:morsel](https://docs.python.org/3/library/http.cookies.html#http.cookies.Morsel):
 
     - expires
     - path
