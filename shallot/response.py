@@ -42,13 +42,13 @@ def text(body="", status=200, encoding="utf-8"):
     }
 
 
-def json(data, status=200):
-    transfer_body = pyjson.dumps(data).encode()
+def json(data, status=200, ensure_ascii=True, encoding="utf-8"):
+    transfer_body = pyjson.dumps(data, ensure_ascii=ensure_ascii).encode(encoding)
     return {
         "status": status,
         "body": transfer_body,
         "headers": {
-            "content-type": "application/json; charset=utf-8",
+            "content-type": f"application/json; charset={encoding}",
             "content-length": f"{len(transfer_body)}",
         },
     }

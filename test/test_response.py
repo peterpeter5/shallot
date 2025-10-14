@@ -1,4 +1,4 @@
-from shallot.response import filestream
+from shallot.response import filestream, text, json as json_response
 import inspect
 import os
 import pytest
@@ -45,3 +45,44 @@ async def test_filestream_reads_all_bytes_chunked():
                 actual += chunk
 
             assert actual == content, f"Len of actual: <{len(actual)}> and of content <{len(content)}> "
+
+
+def test_json_response_honors_status_code():
+    response = json_response({"any": "data"}, status=499)
+    assert response["status"] == 499, "Status Code not properly set!"
+
+
+def test_json_response_is_utf_8_decoded():
+    emoji = b"\xF0\x9F\x98\x81".decode("utf-8")
+    response = json_response([emoji], ensure_ascii=False)
+    assert response["body"].decode("utf-8") == f'["{emoji}"]'
+
+
+def test_json_response_encoding_is_properly_set():
+    test_string = "Äshallot!"
+    target = test_string.encode("ISO-8859-1")
+    response = json_response([test_string], encoding="ISO-8859-1", ensure_ascii=False)
+    assert response["body"].strip(b'["]') == target
+
+    assert response["headers"]["content-type"] == "application/json; charset=ISO-8859-1"
+
+
+def test_text_response_honors_status_code():
+    response = text("any string", status=499)
+    assert response["status"] == 499, "Status Code not properly set!"
+
+
+def test_json_response_is_utf_8_decoded():
+    emoji = b"\xF0\x9F\x98\x81".decode("utf-8")
+    response = text(emoji)
+    assert response["body"].decode("utf-8") == emoji
+
+
+def test_json_response_encoding_is_properly_set():
+    test_string = "Äshallot!"
+    target = test_string.encode("ISO-8859-1")
+    response = text(test_string, encoding="ISO-8859-1")
+    assert response["body"] == target
+
+    assert response["headers"]["content-type"] == "text/plain; charset=ISO-8859-1"
+

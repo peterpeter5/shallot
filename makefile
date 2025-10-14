@@ -14,9 +14,10 @@ install: testvenv
 	source .testvenv/bin/activate; \
 	pip install ./dist/shallot*.whl;
 
-integrationtest-package: build testvenv
+integrationtest-package: clean build testvenv
 	source .testvenv/bin/activate; \
-	pip install $(DIST)[test]; \
+	echo $(DIST)
+	pip install '$(DIST)[test]'; \
 	pytest ./integration_test ./test
 
 
