@@ -55,7 +55,7 @@ def wrap_static(static_folder, root_path="."):
             caching_headers = make_caching_headers(fstat)
             client_caching_headers = extract_matching_cache(request.get("headers", {}))
 
-            if client_caching_headers and client_caching_headers.items() <= caching_headers.items():
+            if (client_caching_headers) and (client_caching_headers.items() <= caching_headers.items()):
                 return respond_not_modified(caching_headers)
             else:
                 return filestream(requested_path, headers=caching_headers)

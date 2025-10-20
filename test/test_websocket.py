@@ -49,7 +49,7 @@ def receive_func_from_coll(coll):
 @pytest.mark.asyncio
 async def test_app_handler_adds_WS_as_method_for_websockets():
     app = build_server(_handle_identity)
-    response = await (app({"type": "websocket"})(receive_raise, send_none))
+    response = await (app({"type": "websocket"}, receive_raise, send_none))
     assert "method" in response
     assert response["method"] == "WS"
 
@@ -57,7 +57,7 @@ async def test_app_handler_adds_WS_as_method_for_websockets():
 @pytest.mark.asyncio
 async def test_app_handler_exposes_asgi_interface_for_ws():
     app = build_server(raw_asgi_wrapper)
-    response = await (app({"type": "websocket"})(receive_raise, send_none))
+    response = await (app({"type": "websocket"}, receive_raise, send_none))
     assert response is raw_asgi_handler
 
 
@@ -272,6 +272,7 @@ async def run_ws_handler_with_messages(handler, messages, scope_type="websocket"
     initialized_handler = await handler(scope)
     await initialized_handler(receiver, async_sender)
     return sender.call_args_list
+
 
 @pytest.mark.asyncio
 async def test_ws_handler_raises_error_when_handshake_msg_is_missing():

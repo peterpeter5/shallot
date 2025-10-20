@@ -14,7 +14,7 @@ test_requires = ["pytest", "hypothesis", "requests", "pytest-asyncio", "pytest-c
 
 setuptools.setup(
     name="shallot",
-    version="1.0.1",
+    version="1.1.0",
     author="Peter Peter",
     author_email="dev.peterpeter5@gmail.com",
     description="Fast, small ASGI-compliant webframework",

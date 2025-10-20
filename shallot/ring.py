@@ -1,9 +1,9 @@
+import asyncio
 from collections import defaultdict
-from asyncio import wait_for, Event
+from asyncio import wait_for, Event, TimeoutError
 import sys
 from itertools import chain
 import logging
-from functools import partial
 
 __pytest__ = hasattr(sys, "_pytest_shallot_")
 
@@ -21,7 +21,7 @@ def _reset_ring_state():
 
 def _is_startup_completed():
     startup = _ring_state["startup_event"]
-    return startup is None or startup.is_set()
+    return startup is not None and startup.is_set()
 
 
 def _init_startup():
@@ -38,7 +38,23 @@ def _mark_startup_completed(user_config):
 
 
 async def _wait_on_completed_startup():
-    await _ring_state["startup_event"].wait()
+    async def wait_on_startup_event_indefinitly():
+        while _ring_state.get("startup_event") is None:
+            await asyncio.sleep(0.1)
+
+    lifecycle_event_came = asyncio.ensure_future(wait_on_startup_event_indefinitly())
+    lifespan_came_timeout = 2
+    try:
+        await asyncio.wait_for(lifecycle_event_came, timeout=lifespan_came_timeout)
+    except TimeoutError:
+        logging.warning(
+            f"Waited {lifespan_came_timeout}s for the server to send a lifespan-event"
+            + "before the first http/ws request, but nothing came. Will assume startup is over!"
+        )
+        _init_startup()
+        _mark_startup_completed({"shallot-info": "No lifespan-protocol implemented by server!"})
+    else:
+        await _ring_state["startup_event"].wait()
 
 
 def unicode2(xys, encoding="utf-8"):
@@ -112,10 +128,6 @@ async def _responde_client_direct(send, response):
     )
 
 
-async def noop(receive, send):
-    return None
-
-
 async def _default_on_start(scope):
     pass
 
@@ -125,6 +137,7 @@ async def _default_on_stop(scope):
 
 
 async def lifespan_handler(context, on_start, on_stop, receive, send):
+    _init_startup()
     while True:
         message = await receive()
         if message["type"] == "lifespan.startup":
@@ -166,22 +179,15 @@ async def handle_request(context, handler, max_responde_timeout_s, max_receive_t
         await response(receive, send)
     else:
         await wait_for(responde_client(send, response), max_responde_timeout_s)
-    if __pytest__:
-        return response
+    return response
 
 
 def build_server(
     handler, max_responde_timeout_s=30, max_receive_timeout_s=15, on_start=_default_on_start, on_stop=_default_on_stop
 ):
-    async def wait_on_startup_then_run(func, receive, send):
-        await _wait_on_completed_startup()
-        _ring_state["user_config"]
-
-        return await func(receive, send)
-
     _reset_ring_state()
 
-    def request_start(scope):
+    async def request_start(scope, receive, send):
 
         if "type" not in scope:
             raise NotImplementedError("no type in scope! error for %s" % scope)
@@ -189,23 +195,28 @@ def build_server(
         context = scope.copy()
         context["config"] = _ring_state["user_config"]
 
-        request_handler = partial(handle_request, context, handler, max_responde_timeout_s, max_receive_timeout_s)
-
         if context["type"] in {"http", "websocket"} and _is_startup_completed():
-            return request_handler
+            response = await handle_request(
+                context, handler, max_responde_timeout_s, max_receive_timeout_s, receive, send
+            )
 
         elif context["type"] in {"http", "websocket"} and not _is_startup_completed():
             logging.warning(
                 "Server processed request before start-up complete. This is against asgi-specification!"
                 + "Wait until start-up is done!"
             )
-            return partial(wait_on_startup_then_run, request_handler)
+            await _wait_on_completed_startup()
+            response = await handle_request(
+                context, handler, max_responde_timeout_s, max_receive_timeout_s, receive, send
+            )
 
         elif context["type"] == "lifespan":
-            _init_startup()
-            return partial(lifespan_handler, context, on_start, on_stop)
+            response = await lifespan_handler(context, on_start, on_stop, receive, send)
         else:
             logging.warning(f"scope:type: {context['type']} currently not supported")
-            return noop
+            return None
+
+        if __pytest__:
+            return response
 
     return request_start

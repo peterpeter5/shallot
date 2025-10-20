@@ -86,6 +86,7 @@ def wrap_routes(routing_table):
             if new_handler is None:
                 return await next_middleware(handler, request)
             else:
+                return await next_middleware(new_handler, request)
                 return await next_middleware(RPartial(new_handler, args), request)
 
         return dispatch_handler
