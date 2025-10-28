@@ -112,6 +112,8 @@ A good analogy for a middleware is a python-decorator. A decorator wraps a funct
 the minimal deployable thing, one can build is this:
 
 ```python
+from shallot import build_server
+
 async def minimal(request):
     """
     answer EVERY request with 200 and NO body 

@@ -114,8 +114,8 @@ The above example shows a middleware that would simply printout the request and 
 `middlewares` are great because they can be composed/chained together. In that way every `middleware` can enhance the `request` / `response` or choose a different `handler` to add functionality. Chaining middlewares is done via the `apply_middleware` - function provided by shallot:
 
 ```python
-from shallot.middlewares import chain_middleware
-middlewares = chain_middleware(middleware1, middleware2, middleware3)
+from shallot.middlewares import apply_middleware
+middlewares = apply_middleware(middleware1, middleware2, middleware3)
 
 enhanced_handler = middlewares(default_handler)
 ```
