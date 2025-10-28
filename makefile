@@ -32,5 +32,5 @@ format-check:
 	flake8 shallot/*
 
 test: format-check
-	pytest --cov=shallot --cov-report html --cov-report term test/ 
+	pytest --cov=shallot --cov-report html --cov-report term test/ integration_test/
 
