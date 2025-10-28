@@ -182,6 +182,14 @@ async def handle_request(context, handler, max_responde_timeout_s, max_receive_t
     return response
 
 
+async def handle_custom_protocols(context, handler, receive, send):
+    body = await receive()
+    request = context | body
+
+    response = await handler(request)
+    await send(response)
+
+
 def build_server(
     handler, max_responde_timeout_s=30, max_receive_timeout_s=15, on_start=_default_on_start, on_stop=_default_on_stop
 ):
@@ -212,6 +220,9 @@ def build_server(
 
         elif context["type"] == "lifespan":
             response = await lifespan_handler(context, on_start, on_stop, receive, send)
+
+        elif context["type"] == "shallot::custom":
+            response = await handle_custom_protocols(scope, handler, receive, send)
         else:
             logging.warning(f"scope:type: {context['type']} currently not supported")
             return None

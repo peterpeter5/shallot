@@ -31,13 +31,26 @@ def filestream(path, headers=None, chunk_size=4096):
 
 
 def text(body="", status=200, encoding="utf-8"):
-    transfered_body = body.encode(encoding)
+    transfer_body = body.encode(encoding)
     return {
         "status": status,
-        "body": transfered_body,
+        "body": transfer_body,
         "headers": {
             "content-type": f"text/plain; charset={encoding}",
-            "content-length": f"{len(transfered_body)}",
+            "content-length": f"{len(transfer_body)}",
+        },
+    }
+
+
+def html(body, status=200, encoding="utf-8"):
+
+    transfer_body = body.encode(encoding)
+    return {
+        "status": status,
+        "body": transfer_body,
+        "headers": {
+            "content-type": f"text/html; charset={encoding}",
+            "content-length": f"{len(transfer_body)}",
         },
     }
 
