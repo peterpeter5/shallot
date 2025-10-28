@@ -1,18 +1,13 @@
 from contextlib import contextmanager
 from hypothesis import given, settings
 from hypothesis import strategies as st
-import pytest
 import os
 from shallot import build_server
 from shallot.middlewares import apply_middleware
 from shallot.middlewares.staticfiles import wrap_static
-from multiprocessing import Process
-import uvicorn
 import requests
-import time
 import sys
 import shutil
-from random import randint, sample
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 import os
 from urllib.parse import quote, unquote
